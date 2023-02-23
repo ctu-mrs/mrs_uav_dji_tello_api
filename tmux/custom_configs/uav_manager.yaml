@@ -1,0 +1,19 @@
+takeoff:
+
+  during_takeoff:
+    controller: "Se3Controller"
+    tracker: "LandoffTracker"
+
+  after_takeoff:
+    controller: "Se3Controller"
+    tracker: "MpcTracker"
+
+landing:
+
+  landing_controller: "Se3Controller"
+
+min_height_checking:
+  enabled: false
+
+max_height_checking:
+  enabled: false

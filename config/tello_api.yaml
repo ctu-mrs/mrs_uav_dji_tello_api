@@ -1,0 +1,6 @@
+hw_interface_plugin: "mrs_uav_tello_api/Api"
+
+gnss:
+  utm_x: 465710.758973
+  utm_y: 5249465.43086
+  amsl: 340.0

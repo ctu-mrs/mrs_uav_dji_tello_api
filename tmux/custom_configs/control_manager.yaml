@@ -1,0 +1,5 @@
+safety:
+
+  eland:
+
+    controller: "EmergencyController"

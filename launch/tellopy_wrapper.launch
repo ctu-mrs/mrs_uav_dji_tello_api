@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- args corresponding to environment variables -->
+  <arg name="UAV_NAME" default="$(optenv UAV_NAME)" />
+
+  <group ns="$(arg UAV_NAME)">
+
+    <node name="tellopy_wrapper" pkg="mrs_uav_tello_api" type="tellopy_wrapper_2.py" output="screen">
+
+      <remap from="~battery_out" to="~battery" />
+      <remap from="~height_out" to="~height" />
+      <remap from="~pose_out" to="~pose" />
+      <remap from="~twist_out" to="~twist" />
+      <remap from="~armed_out" to="~armed" />
+
+      <remap from="~arm_in" to="~arm" />
+      <remap from="~cmd_in" to="~cmd" />
+
+    </node>
+
+  </group>
+
+</launch>
