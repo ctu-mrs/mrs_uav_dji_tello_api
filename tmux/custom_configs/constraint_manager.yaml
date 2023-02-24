@@ -8,7 +8,7 @@ constraint_management:
 slow:
 
   horizontal:
-    speed: 0.3
+    speed: 1.0
     acceleration: 1.0
     jerk: 20.0
     snap: 20.0
@@ -16,13 +16,13 @@ slow:
   vertical:
 
     ascending:
-      speed: 0.3
+      speed: 1.0
       acceleration: 1.0
       jerk: 20.0
       snap: 20.0
 
     descending:
-      speed: 0.3
+      speed: 1.0
       acceleration: 1.0
       jerk: 20.0
       snap: 20.0

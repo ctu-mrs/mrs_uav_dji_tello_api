@@ -1,16 +1,14 @@
-takeoff:
+midair_activation:
 
-  during_takeoff:
-    controller: "Se3Controller"
-    tracker: "LandoffTracker"
+  rate: 100 # [Hz]
 
-  after_takeoff:
+  during_activation:
+    controller: "MidairActivationController"
+    tracker: "MidairActivationTracker"
+
+  after_activation:
     controller: "Se3Controller"
     tracker: "MpcTracker"
-
-landing:
-
-  landing_controller: "Se3Controller"
 
 min_height_checking:
   enabled: false

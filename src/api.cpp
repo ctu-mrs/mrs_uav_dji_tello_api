@@ -27,15 +27,15 @@
 
 //}
 
-namespace mrs_uav_tello_api
+namespace mrs_uav_dji_tello_api
 {
 
-/* class MrsUavTelloApi //{ */
+/* class MrsUavDjiTelloApi //{ */
 
-class MrsUavTelloApi : public mrs_uav_hw_api::MrsUavHwApi {
+class MrsUavDjiTelloApi : public mrs_uav_hw_api::MrsUavHwApi {
 
 public:
-  ~MrsUavTelloApi(){};
+  ~MrsUavDjiTelloApi(){};
 
   void initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers, const std::string &topic_prefix,
                   const std::string &uav_name);
@@ -134,8 +134,8 @@ private:
 
 /* initialize() //{ */
 
-void MrsUavTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers,
-                                [[maybe_unused]] const std::string &topic_prefix, [[maybe_unused]] const std::string &uav_name) {
+void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers,
+                                   [[maybe_unused]] const std::string &topic_prefix, [[maybe_unused]] const std::string &uav_name) {
 
   ros::NodeHandle nh_(parent_nh);
 
@@ -153,7 +153,7 @@ void MrsUavTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_pt
   param_loader.loadParam("gnss/amsl", _amsl_);
 
   if (!param_loader.loadedSuccessfully()) {
-    ROS_ERROR("[MrsUavTelloApi]: Could not load all parameters!");
+    ROS_ERROR("[MrsUavDjiTelloApi]: Could not load all parameters!");
     ros::shutdown();
   }
 
@@ -168,15 +168,15 @@ void MrsUavTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_pt
   shopts.queue_size         = 10;
   shopts.transport_hints    = ros::TransportHints().tcpNoDelay();
 
-  sh_armed_ = mrs_lib::SubscribeHandler<std_msgs::Bool>(shopts, "armed_in", &MrsUavTelloApi::callbackArmed, this);
+  sh_armed_ = mrs_lib::SubscribeHandler<std_msgs::Bool>(shopts, "armed_in", &MrsUavDjiTelloApi::callbackArmed, this);
 
-  sh_pose_ = mrs_lib::SubscribeHandler<geometry_msgs::PoseStamped>(shopts, "pose_in", &MrsUavTelloApi::callbackPose, this);
+  sh_pose_ = mrs_lib::SubscribeHandler<geometry_msgs::PoseStamped>(shopts, "pose_in", &MrsUavDjiTelloApi::callbackPose, this);
 
-  sh_twist_ = mrs_lib::SubscribeHandler<geometry_msgs::TwistStamped>(shopts, "twist_in", &MrsUavTelloApi::callbackTwist, this);
+  sh_twist_ = mrs_lib::SubscribeHandler<geometry_msgs::TwistStamped>(shopts, "twist_in", &MrsUavDjiTelloApi::callbackTwist, this);
 
-  sh_battery_ = mrs_lib::SubscribeHandler<sensor_msgs::BatteryState>(shopts, "battery_in", &MrsUavTelloApi::callbackBattery, this);
+  sh_battery_ = mrs_lib::SubscribeHandler<sensor_msgs::BatteryState>(shopts, "battery_in", &MrsUavDjiTelloApi::callbackBattery, this);
 
-  sh_height_ = mrs_lib::SubscribeHandler<std_msgs::Float64>(shopts, "height_in", &MrsUavTelloApi::callbackHeight, this);
+  sh_height_ = mrs_lib::SubscribeHandler<std_msgs::Float64>(shopts, "height_in", &MrsUavDjiTelloApi::callbackHeight, this);
 
   // | --------------------- service clients -------------------- |
 
@@ -189,7 +189,7 @@ void MrsUavTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_pt
 
   // | ----------------------- finish init ---------------------- |
 
-  ROS_INFO("[MrsUavTelloApi]: initialized");
+  ROS_INFO("[MrsUavDjiTelloApi]: initialized");
 
   is_initialized_ = true;
 }
@@ -198,7 +198,7 @@ void MrsUavTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_pt
 
 /* getDiagnostics() //{ */
 
-mrs_msgs::HwApiDiagnostics MrsUavTelloApi::getDiagnostics() {
+mrs_msgs::HwApiDiagnostics MrsUavDjiTelloApi::getDiagnostics() {
 
   mrs_msgs::HwApiDiagnostics diag;
 
@@ -220,7 +220,7 @@ mrs_msgs::HwApiDiagnostics MrsUavTelloApi::getDiagnostics() {
 
 /* getMode() //{ */
 
-mrs_msgs::HwApiMode MrsUavTelloApi::getMode() {
+mrs_msgs::HwApiMode MrsUavDjiTelloApi::getMode() {
 
   mrs_msgs::HwApiMode mode;
 
@@ -252,9 +252,9 @@ mrs_msgs::HwApiMode MrsUavTelloApi::getMode() {
 
 /* callbackControlActuatorCmd() //{ */
 
-bool MrsUavTelloApi::callbackActuatorCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiActuatorCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackActuatorCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiActuatorCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting actuator cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting actuator cmd");
 
   return false;
 }
@@ -263,9 +263,9 @@ bool MrsUavTelloApi::callbackActuatorCmd([[maybe_unused]] mrs_lib::SubscribeHand
 
 /* callbackControlGroupCmd() //{ */
 
-bool MrsUavTelloApi::callbackControlGroupCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiControlGroupCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackControlGroupCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiControlGroupCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting control group cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting control group cmd");
 
   return true;
 }
@@ -274,9 +274,9 @@ bool MrsUavTelloApi::callbackControlGroupCmd([[maybe_unused]] mrs_lib::Subscribe
 
 /* callbackAttitudeRateCmd() //{ */
 
-bool MrsUavTelloApi::callbackAttitudeRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAttitudeRateCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackAttitudeRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAttitudeRateCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting attitude rate cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting attitude rate cmd");
 
   return true;
 }
@@ -285,9 +285,9 @@ bool MrsUavTelloApi::callbackAttitudeRateCmd([[maybe_unused]] mrs_lib::Subscribe
 
 /* callbackAttitudeCmd() //{ */
 
-bool MrsUavTelloApi::callbackAttitudeCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAttitudeCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackAttitudeCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAttitudeCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting attitude cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting attitude cmd");
 
   return false;
 }
@@ -296,9 +296,9 @@ bool MrsUavTelloApi::callbackAttitudeCmd([[maybe_unused]] mrs_lib::SubscribeHand
 
 /* callbackAccelerationHdgRateCmd() //{ */
 
-bool MrsUavTelloApi::callbackAccelerationHdgRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAccelerationHdgRateCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackAccelerationHdgRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAccelerationHdgRateCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting acceleration+hdg rate cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting acceleration+hdg rate cmd");
 
   return false;
 }
@@ -307,9 +307,9 @@ bool MrsUavTelloApi::callbackAccelerationHdgRateCmd([[maybe_unused]] mrs_lib::Su
 
 /* callbackAccelerationHdgCmd() //{ */
 
-bool MrsUavTelloApi::callbackAccelerationHdgCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAccelerationHdgCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackAccelerationHdgCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiAccelerationHdgCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting acceleration+hdg cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting acceleration+hdg cmd");
 
   return false;
 }
@@ -318,9 +318,9 @@ bool MrsUavTelloApi::callbackAccelerationHdgCmd([[maybe_unused]] mrs_lib::Subscr
 
 /* callbackVelocityHdgRateCmd() //{ */
 
-bool MrsUavTelloApi::callbackVelocityHdgRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiVelocityHdgRateCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackVelocityHdgRateCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiVelocityHdgRateCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting velocity+hdg rate cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting velocity+hdg rate cmd");
 
   auto msg_in = wrp.getMsg();
 
@@ -348,9 +348,9 @@ bool MrsUavTelloApi::callbackVelocityHdgRateCmd([[maybe_unused]] mrs_lib::Subscr
 
 /* callbackVelocityHdgCmd() //{ */
 
-bool MrsUavTelloApi::callbackVelocityHdgCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiVelocityHdgCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackVelocityHdgCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiVelocityHdgCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting velocity+hdg cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting velocity+hdg cmd");
 
   return false;
 }
@@ -359,9 +359,9 @@ bool MrsUavTelloApi::callbackVelocityHdgCmd([[maybe_unused]] mrs_lib::SubscribeH
 
 /* callbackPositionCmd() //{ */
 
-bool MrsUavTelloApi::callbackPositionCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiPositionCmd> &wrp) {
+bool MrsUavDjiTelloApi::callbackPositionCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::HwApiPositionCmd> &wrp) {
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting position cmd");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting position cmd");
 
   return false;
 }
@@ -370,7 +370,7 @@ bool MrsUavTelloApi::callbackPositionCmd([[maybe_unused]] mrs_lib::SubscribeHand
 
 /* callbackArming() //{ */
 
-std::tuple<bool, std::string> MrsUavTelloApi::callbackArming([[maybe_unused]] const bool &request) {
+std::tuple<bool, std::string> MrsUavDjiTelloApi::callbackArming([[maybe_unused]] const bool &request) {
 
   std::stringstream ss;
 
@@ -407,7 +407,7 @@ std::tuple<bool, std::string> MrsUavTelloApi::callbackArming([[maybe_unused]] co
 
 /* callbackOffboard() //{ */
 
-std::tuple<bool, std::string> MrsUavTelloApi::callbackOffboard(void) {
+std::tuple<bool, std::string> MrsUavDjiTelloApi::callbackOffboard(void) {
 
   std::stringstream ss;
 
@@ -433,13 +433,13 @@ std::tuple<bool, std::string> MrsUavTelloApi::callbackOffboard(void) {
 
 /* //{ callbackTelloStatus() */
 
-void MrsUavTelloApi::callbackArmed(mrs_lib::SubscribeHandler<std_msgs::Bool> &wrp) {
+void MrsUavDjiTelloApi::callbackArmed(mrs_lib::SubscribeHandler<std_msgs::Bool> &wrp) {
 
   if (!is_initialized_) {
     return;
   }
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting armed state");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting armed state");
 
   auto state = wrp.getMsg();
 
@@ -471,13 +471,13 @@ void MrsUavTelloApi::callbackArmed(mrs_lib::SubscribeHandler<std_msgs::Bool> &wr
 
 /* calbackPose() //{ */
 
-void MrsUavTelloApi::callbackPose(mrs_lib::SubscribeHandler<geometry_msgs::PoseStamped> &wrp) {
+void MrsUavDjiTelloApi::callbackPose(mrs_lib::SubscribeHandler<geometry_msgs::PoseStamped> &wrp) {
 
   if (!is_initialized_) {
     return;
   }
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting local odometry");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting local odometry");
 
   // | --------------- publish the local odometry --------------- |
 
@@ -490,13 +490,13 @@ void MrsUavTelloApi::callbackPose(mrs_lib::SubscribeHandler<geometry_msgs::PoseS
 
 /* calbackHeight() //{ */
 
-void MrsUavTelloApi::callbackHeight(mrs_lib::SubscribeHandler<std_msgs::Float64> &wrp) {
+void MrsUavDjiTelloApi::callbackHeight(mrs_lib::SubscribeHandler<std_msgs::Float64> &wrp) {
 
   if (!is_initialized_) {
     return;
   }
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting height");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting height");
 
   // | --------------- publish the local odometry --------------- |
 
@@ -514,13 +514,13 @@ void MrsUavTelloApi::callbackHeight(mrs_lib::SubscribeHandler<std_msgs::Float64>
 
 /* calbackTwist() //{ */
 
-void MrsUavTelloApi::callbackTwist(mrs_lib::SubscribeHandler<geometry_msgs::TwistStamped> &wrp) {
+void MrsUavDjiTelloApi::callbackTwist(mrs_lib::SubscribeHandler<geometry_msgs::TwistStamped> &wrp) {
 
   if (!is_initialized_) {
     return;
   }
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting local odometry");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting local odometry");
 
   if (!sh_pose_.hasMsg()) {
     return;
@@ -557,13 +557,13 @@ void MrsUavTelloApi::callbackTwist(mrs_lib::SubscribeHandler<geometry_msgs::Twis
 
 /* callbackBattery() //{ */
 
-void MrsUavTelloApi::callbackBattery(mrs_lib::SubscribeHandler<sensor_msgs::BatteryState> &wrp) {
+void MrsUavDjiTelloApi::callbackBattery(mrs_lib::SubscribeHandler<sensor_msgs::BatteryState> &wrp) {
 
   if (!is_initialized_) {
     return;
   }
 
-  ROS_INFO_ONCE("[MrsUavTelloApi]: getting battery");
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting battery");
 
   sensor_msgs::BatteryStateConstPtr msg = wrp.getMsg();
 
@@ -576,7 +576,7 @@ void MrsUavTelloApi::callbackBattery(mrs_lib::SubscribeHandler<sensor_msgs::Batt
 
 /* publishOdom() //{ */
 
-void MrsUavTelloApi::publishOdom(void) {
+void MrsUavDjiTelloApi::publishOdom(void) {
 
   // | ---------------- fill in the odom message ---------------- |
 
@@ -654,7 +654,7 @@ void MrsUavTelloApi::publishOdom(void) {
 
 //}
 
-}  // namespace mrs_uav_tello_api
+}  // namespace mrs_uav_dji_tello_api
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(mrs_uav_tello_api::MrsUavTelloApi, mrs_uav_hw_api::MrsUavHwApi)
+PLUGINLIB_EXPORT_CLASS(mrs_uav_dji_tello_api::MrsUavDjiTelloApi, mrs_uav_hw_api::MrsUavHwApi)

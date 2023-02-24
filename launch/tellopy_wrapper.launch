@@ -5,7 +5,7 @@
 
   <group ns="$(arg UAV_NAME)">
 
-    <node name="tellopy_wrapper" pkg="mrs_uav_tello_api" type="tellopy_wrapper_2.py" output="screen">
+    <node name="tellopy_wrapper" pkg="mrs_uav_dji_tello_api" type="tellopy_wrapper.py" output="screen">
 
       <remap from="~battery_out" to="~battery" />
       <remap from="~height_out" to="~height" />

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
 
-  <name>mrs_uav_tello_api</name>
+  <name>mrs_uav_dji_tello_api</name>
   <version>1.0.0</version>
-  <description>TELLO API for MRS UAV System</description>
+  <description>DJI TELLO API for MRS UAV System</description>
 
   <author email="tomas.baca@fel.cvut.cz">Tomas Baca</author>
   <maintainer email="tomas.baca@fel.cvut.cz">Tomas Baca</maintainer>
@@ -23,7 +23,6 @@
   <depend>geometry_msgs</depend>
   <depend>mrs_uav_hw_api</depend>
   <depend>tello_driver</depend>
-  <depend>mavros_msgs</depend>
   <depend>rospy</depend>
 
   <export>

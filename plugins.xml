@@ -1,5 +1,5 @@
-<library path="lib/libMrsUavHwTelloApi">
-  <class name="mrs_uav_tello_api/Api" type="mrs_uav_tello_api::MrsUavTelloApi" base_class_type="mrs_uav_hw_api::MrsUavHwApi">
-    <description>Tello API module for the MRS UAV System</description>
+<library path="lib/libMrsUavHwDjiTelloApi">
+  <class name="mrs_uav_dji_tello_api/Api" type="mrs_uav_dji_tello_api::MrsUavDjiTelloApi" base_class_type="mrs_uav_hw_api::MrsUavHwApi">
+    <description>DJI Tello API module for the MRS UAV System</description>
   </class>
 </library>

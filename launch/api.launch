@@ -19,14 +19,14 @@
   <arg     if="$(arg debug)" name="launch_prefix" value="debug_roslaunch" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
 
-  <include file="$(find mrs_uav_tello_api)/launch/tellopy_wrapper.launch" />
+  <include file="$(find mrs_uav_dji_tello_api)/launch/tellopy_wrapper.launch" />
 
   <group ns="$(arg UAV_NAME)">
 
     <node pkg="nodelet" type="nodelet" name="hw_api" args="$(arg nodelet) mrs_uav_hw_api/HwApiManager $(arg nodelet_manager)" output="screen" launch-prefix="$(arg launch_prefix)">
 
       <rosparam file="$(find mrs_uav_hw_api)/config/hw_api.yaml" />
-      <rosparam file="$(find mrs_uav_tello_api)/config/tello_api.yaml" />
+      <rosparam file="$(find mrs_uav_dji_tello_api)/config/tello_api.yaml" />
 
       <!-- Load a user param file -->
       <rosparam if="$(eval not arg('custom_config') == '')" file="$(arg custom_config)" />

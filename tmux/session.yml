@@ -1,6 +1,6 @@
 name: uav
 root: ./
-pre_window: export UAV_NAME="uav1"; export RUN_TYPE=uav; export UAV_TYPE=f330; export WORLD_NAME=simulation; export SENSORS=""; export ODOMETRY_TYPE="gps"; export LOGGER_DEBUG=true; export WORLD_FILE=./custom_configs/world.yaml
+pre_window: export UAV_NAME="uav1"; export RUN_TYPE=uav; export UAV_TYPE=f330; export WORLD_NAME=simulation; export SENSORS=""; export ODOMETRY_TYPE="gps"; export LOGGER_DEBUG=false; export DEBU=true; export WORLD_FILE=./custom_configs/world.yaml
 startup_window: status
 windows:
   - roscore:
@@ -24,6 +24,7 @@ windows:
       panes:
         - 'history -s rosservice call /uav1/hw_api/arming 1'
         - 'history -s rosservice call /uav1/uav_manager/midair_activation'
+        - 'history -s rosservice call /uav1/control_manager/eland'
   - goto:
       layout: tiled
       panes:
