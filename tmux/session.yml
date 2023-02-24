@@ -1,6 +1,6 @@
 name: uav
 root: ./
-pre_window: export UAV_NAME="uav1"; export RUN_TYPE=uav; export UAV_TYPE=f330; export WORLD_NAME=simulation; export SENSORS=""; export ODOMETRY_TYPE="gps"; export LOGGER_DEBUG=false; export DEBU=true; export WORLD_FILE=./custom_configs/world.yaml
+pre_window: export UAV_NAME="uav1"; export RUN_TYPE=uav; export UAV_TYPE=f330; export WORLD_NAME=simulation; export SENSORS=""; export ODOMETRY_TYPE="gps"; export LOGGER_DEBUG=true; export DEBUG=false; export WORLD_FILE=./custom_configs/world.yaml
 startup_window: status
 windows:
   - roscore:
@@ -18,7 +18,7 @@ windows:
   - control:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_uav_general core.launch config_control_manager:=./custom_configs/control_manager.yaml config_uav_manager:=./custom_configs/uav_manager.yaml config_odometry:=./custom_configs/odometry.yaml config_constraint_manager:=./custom_configs/constraint_manager.yaml
+        - waitForRos; roslaunch mrs_uav_general core.launch config_control_manager:=./custom_configs/control_manager.yaml config_uav_manager:=./custom_configs/uav_manager.yaml config_odometry:=./custom_configs/odometry.yaml config_constraint_manager:=./custom_configs/constraint_manager.yaml config_se3_controller:=./custom_configs/se3.yaml
   - takeoff:
       layout: tiled
       panes:
@@ -28,7 +28,7 @@ windows:
   - goto:
       layout: tiled
       panes:
-        - 'history -s rosservice call /$UAV_NAME/control_manager/goto \"goal: \[0.0, 10.0, 1.5, 0.0\]\"'
+        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_fcu \"goal: \[1.0, 0.0, 0.0, 0.0\]\"'
   - rviz:
       layout: tiled
       panes:
