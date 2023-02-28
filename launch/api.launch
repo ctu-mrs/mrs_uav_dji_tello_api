@@ -56,11 +56,15 @@
       <remap from="~height_in" to="tellopy_wrapper/height" />
 
       <!-- Publishers -->
-      <remap from="~mode_out" to="~mode" />
-      <remap from="~diagnostics_out" to="~diagnostics" />
+      <remap from="~capabilities_out" to="~capabilities" />
+      <remap from="~status_out" to="~status" />
       <remap from="~gnss_out" to="~gnss" />
       <remap from="~gnss_status_out" to="~gnss_status" />
-      <remap from="~odometry_local_out" to="~odometry_local" />
+      <remap from="~odometry_out" to="~odometry" />
+      <remap from="~position_out" to="~position" />
+      <remap from="~orientation_out" to="~orientation" />
+      <remap from="~velocity_out" to="~velocity" />
+      <remap from="~angular_velocity_out" to="~angular_velocity" />
       <remap from="~distance_sensor_out" to="~distance_sensor" />
       <remap from="~mag_heading_out" to="~mag_heading" />
       <remap from="~altitude_out" to="~altitude" />

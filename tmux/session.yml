@@ -14,7 +14,7 @@ windows:
   - hw_api:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_uav_tello_api api.launch
+        - waitForRos; roslaunch mrs_uav_dji_tello_api api.launch
   - control:
       layout: tiled
       panes:

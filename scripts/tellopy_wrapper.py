@@ -51,6 +51,7 @@ class TellopyWrapper:
         self.tello.connect()
         self.tello.subscribe(self.tello.EVENT_FLIGHT_DATA, self.handler)
         self.tello.subscribe(self.tello.EVENT_LOG_DATA, self.handler)
+        self.tello.fast_mode = False
 
         self.rate = rospy.Rate(15)
 
@@ -130,10 +131,10 @@ class TellopyWrapper:
 
     def callbackCmd(self, msg):
 
-        vel_x = msg.velocity.x*1.0
-        vel_y = msg.velocity.y*1.0
-        vel_z = msg.velocity.z*1.0
-        hdg_rate = msg.heading_rate
+        vel_x = msg.velocity.x*0.6
+        vel_y = msg.velocity.y*0.6
+        vel_z = msg.velocity.z*0.6
+        hdg_rate = msg.heading_rate*0.6
 
         self.tello.set_pitch(vel_x)
         self.tello.set_roll(-vel_y)
