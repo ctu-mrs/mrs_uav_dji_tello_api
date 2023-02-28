@@ -42,8 +42,8 @@ public:
 
   // | --------------------- status methods --------------------- |
 
-  mrs_msgs::HwApiDiagnostics getDiagnostics();
-  mrs_msgs::HwApiMode        getMode();
+  mrs_msgs::HwApiStatus       getStatus();
+  mrs_msgs::HwApiCapabilities getCapabilities();
 
   // | --------------------- topic callbacks -------------------- |
 
@@ -117,7 +117,7 @@ private:
   std::string       mode_;
   std::atomic<bool> armed_     = false;
   std::atomic<bool> connected_ = false;
-  std::mutex        mutex_diagnostics_;
+  std::mutex        mutex_status_;
 
   geometry_msgs::PoseStamped pose_;
   std::mutex                 mutex_pose_;
@@ -196,56 +196,58 @@ void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared
 
 //}
 
-/* getDiagnostics() //{ */
+/* getStatus() //{ */
 
-mrs_msgs::HwApiDiagnostics MrsUavDjiTelloApi::getDiagnostics() {
+mrs_msgs::HwApiStatus MrsUavDjiTelloApi::getStatus() {
 
-  mrs_msgs::HwApiDiagnostics diag;
+  mrs_msgs::HwApiStatus status;
 
-  diag.stamp = ros::Time::now();
+  status.stamp = ros::Time::now();
 
   {
-    std::scoped_lock lock(mutex_diagnostics_);
+    std::scoped_lock lock(mutex_status_);
 
-    diag.armed     = armed_;
-    diag.offboard  = offboard_;
-    diag.connected = connected_;
-    diag.mode      = mode_;
+    status.armed     = armed_;
+    status.offboard  = offboard_;
+    status.connected = connected_;
+    status.mode      = mode_;
   }
 
-  return diag;
+  return status;
 }
 
 //}
 
-/* getMode() //{ */
+/* getCapabilities() //{ */
 
-mrs_msgs::HwApiMode MrsUavDjiTelloApi::getMode() {
+mrs_msgs::HwApiCapabilities MrsUavDjiTelloApi::getCapabilities() {
 
-  mrs_msgs::HwApiMode mode;
+  mrs_msgs::HwApiCapabilities capabilities;
 
-  mode.api_name = "TelloApi";
-  mode.stamp    = ros::Time::now();
+  capabilities.api_name = "TelloApi";
+  capabilities.stamp    = ros::Time::now();
 
-  mode.accepts_actuator_cmd              = false;
-  mode.accepts_control_group_cmd         = false;
-  mode.accepts_attitude_rate_cmd         = false;
-  mode.accepts_attitude_cmd              = false;
-  mode.accepts_acceleration_hdg_rate_cmd = false;
-  mode.accepts_acceleration_hdg_cmd      = false;
-  mode.accepts_velocity_hdg_rate_cmd     = true;
-  mode.accepts_velocity_hdg_cmd          = false;
-  mode.accepts_position_cmd              = false;
+  capabilities.accepts_actuator_cmd              = false;
+  capabilities.accepts_control_group_cmd         = false;
+  capabilities.accepts_attitude_rate_cmd         = false;
+  capabilities.accepts_attitude_cmd              = false;
+  capabilities.accepts_acceleration_hdg_rate_cmd = false;
+  capabilities.accepts_acceleration_hdg_cmd      = false;
+  capabilities.accepts_velocity_hdg_rate_cmd     = true;
+  capabilities.accepts_velocity_hdg_cmd          = false;
+  capabilities.accepts_position_cmd              = false;
 
-  mode.produces_distance_sensor      = false;
-  mode.produces_gnss                 = true;
-  mode.produces_imu                  = false;
-  mode.produces_altitude             = true;
-  mode.produces_magnetometer_heading = false;
-  mode.produces_odometry_local       = true;
-  mode.produces_rc_channels          = false;
+  capabilities.produces_distance_sensor      = false;
+  capabilities.produces_gnss                 = true;
+  capabilities.produces_imu                  = false;
+  capabilities.produces_altitude             = true;
+  capabilities.produces_magnetometer_heading = false;
+  capabilities.produces_odometry             = true;
+  capabilities.produces_position             = true;
+  capabilities.produces_velocity             = true;
+  capabilities.produces_rc_channels          = false;
 
-  return mode;
+  return capabilities;
 }
 
 //}
@@ -444,7 +446,7 @@ void MrsUavDjiTelloApi::callbackArmed(mrs_lib::SubscribeHandler<std_msgs::Bool> 
   auto state = wrp.getMsg();
 
   {
-    std::scoped_lock lock(mutex_diagnostics_);
+    std::scoped_lock lock(mutex_status_);
 
     armed_     = state->data;
     connected_ = true;
@@ -452,19 +454,19 @@ void MrsUavDjiTelloApi::callbackArmed(mrs_lib::SubscribeHandler<std_msgs::Bool> 
 
   // | ----------------- publish the diagnostics ---------------- |
 
-  mrs_msgs::HwApiDiagnostics diag;
+  mrs_msgs::HwApiStatus status;
 
   {
-    std::scoped_lock lock(mutex_diagnostics_);
+    std::scoped_lock lock(mutex_status_);
 
-    diag.stamp     = ros::Time::now();
-    diag.armed     = armed_;
-    diag.offboard  = offboard_;
-    diag.connected = connected_;
-    diag.mode      = mode_;
+    status.stamp     = ros::Time::now();
+    status.armed     = armed_;
+    status.offboard  = offboard_;
+    status.connected = connected_;
+    status.mode      = mode_;
   }
 
-  common_handlers_->publishers.publishDiagnostics(diag);
+  common_handlers_->publishers.publishStatus(status);
 }
 
 //}
@@ -599,7 +601,7 @@ void MrsUavDjiTelloApi::publishOdom(void) {
   odom.twist.twist.angular.y = 0;
   odom.twist.twist.angular.z = 0;
 
-  common_handlers_->publishers.publishOdometryLocal(odom);
+  common_handlers_->publishers.publishOdometry(odom);
 
   // | ----------------- publish the orientation ---------------- |
 
