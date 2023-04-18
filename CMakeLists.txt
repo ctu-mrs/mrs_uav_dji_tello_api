@@ -10,8 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   mrs_lib
   mrs_uav_hw_api
-  tello_driver
   geometry_msgs
+  mavros_msgs
   rospy
   )
 
@@ -23,7 +23,7 @@ set(LIBRARIES
   )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp mrs_msgs sensor_msgs mrs_lib mrs_uav_hw_api geometry_msgs tello_driver geometry_msgs rospy
+  CATKIN_DEPENDS roscpp mrs_msgs sensor_msgs mrs_lib mrs_uav_hw_api geometry_msgs geometry_msgs rospy
   LIBRARIES ${LIBRARIES}
   )
 

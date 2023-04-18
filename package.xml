@@ -22,7 +22,7 @@
   <depend>mrs_lib</depend>
   <depend>geometry_msgs</depend>
   <depend>mrs_uav_hw_api</depend>
-  <depend>tello_driver</depend>
+  <depend>mavros_msgs</depend>
   <depend>rospy</depend>
 
   <export>
