@@ -1,0 +1,89 @@
+mrs_uav_controllers:
+
+  se3_controller:
+
+    position_controller:
+
+      translation_gains:
+        p: 2.0
+        d: 0.15
+        i: 0.01
+
+      heading_gains:
+        p: 0.5
+        d: 0.05
+        i: 0.00
+
+mrs_uav_managers:
+
+  estimation_manager:
+
+    # loaded state estimator plugins
+    state_estimators: [
+      "gps_baro",
+    ]
+
+    initial_state_estimator: "gps_baro" # will be used as the first state estimator
+    agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
+
+  uav_manager:
+
+    midair_activation:
+
+      during_activation:
+        controller: "MidairActivationController"
+        tracker: "MidairActivationTracker"
+
+      after_activation:
+        controller: "Se3Controller"
+        tracker: "MpcTracker"
+
+    min_height_checking:
+      enabled: false
+
+    max_height_checking:
+      enabled: false
+
+  constraint_manager:
+
+    constraint_management:
+
+      fallback_constraints:
+        gps_baro: "slow"
+
+    constraints:
+
+      slow:
+
+        horizontal:
+          speed: 0.5
+          acceleration: 0.5
+          jerk: 20.0
+          snap: 20.0
+
+        vertical:
+
+          ascending:
+            speed: 0.5
+            acceleration: 0.5
+            jerk: 20.0
+            snap: 20.0
+
+          descending:
+            speed: 0.5
+            acceleration: 0.5
+            jerk: 20.0
+            snap: 20.0
+
+        heading:
+          speed: 1.0
+          acceleration: 1.0
+          jerk: 10.0
+          snap: 10.0
+
+        angular_speed:
+          roll: 60.0
+          pitch: 60.0
+          yaw: 10.0
+
+        tilt: deg(60)

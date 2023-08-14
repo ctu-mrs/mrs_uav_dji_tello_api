@@ -37,8 +37,7 @@ class MrsUavDjiTelloApi : public mrs_uav_hw_api::MrsUavHwApi {
 public:
   ~MrsUavDjiTelloApi(){};
 
-  void initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers, const std::string &topic_prefix,
-                  const std::string &uav_name);
+  void initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers);
 
   // | --------------------- status methods --------------------- |
 
@@ -57,7 +56,7 @@ public:
   bool callbackVelocityHdgCmd(mrs_lib::SubscribeHandler<mrs_msgs::HwApiVelocityHdgCmd> &wrp);
   bool callbackPositionCmd(mrs_lib::SubscribeHandler<mrs_msgs::HwApiPositionCmd> &wrp);
 
-  void callbackTrackerCmd(mrs_lib::SubscribeHandler<mrs_msgs::TrackerCommand>& wrp);
+  void callbackTrackerCmd(mrs_lib::SubscribeHandler<mrs_msgs::TrackerCommand> &wrp);
 
   // | -------------------- service callbacks ------------------- |
 
@@ -136,8 +135,7 @@ private:
 
 /* initialize() //{ */
 
-void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers,
-                                   [[maybe_unused]] const std::string &topic_prefix, [[maybe_unused]] const std::string &uav_name) {
+void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared_ptr<mrs_uav_hw_api::CommonHandlers_t> common_handlers) {
 
   ros::NodeHandle nh_(parent_nh);
 
@@ -374,7 +372,7 @@ bool MrsUavDjiTelloApi::callbackPositionCmd([[maybe_unused]] mrs_lib::SubscribeH
 
 /* callbackTrackerCmd() //{ */
 
-void MrsUavDjiTelloApi::callbackTrackerCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::TrackerCommand>& wrp) {
+void MrsUavDjiTelloApi::callbackTrackerCmd([[maybe_unused]] mrs_lib::SubscribeHandler<mrs_msgs::TrackerCommand> &wrp) {
 
   ROS_INFO_ONCE("[Api]: getting tracker cmd");
 }

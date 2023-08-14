@@ -1,18 +1,23 @@
-cmake_minimum_required(VERSION 3.1.2)
+cmake_minimum_required(VERSION 3.5)
 project(mrs_uav_dji_tello_api)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
+set(CATKIN_DEPENDENCIES
   cmake_modules
-  mrs_msgs
-  nav_msgs
-  geometry_msgs
-  sensor_msgs
-  mrs_lib
-  mrs_uav_hw_api
   geometry_msgs
   mavros_msgs
+  mrs_lib
+  mrs_msgs
+  mrs_uav_hw_api
+  nav_msgs
+  pluginlib
+  roscpp
   rospy
+  sensor_msgs
+  std_msgs
+  )
+
+find_package(catkin REQUIRED COMPONENTS
+  ${CATKIN_DEPENDENCIES}
   )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -23,7 +28,7 @@ set(LIBRARIES
   )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp mrs_msgs sensor_msgs mrs_lib mrs_uav_hw_api geometry_msgs geometry_msgs rospy
+  CATKIN_DEPENDS ${CATKIN_DEPENDENCIES}
   LIBRARIES ${LIBRARIES}
   )
 
@@ -58,11 +63,25 @@ install(TARGETS ${LIBRARIES}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
   )
 
-install(DIRECTORY config
+install(DIRECTORY launch config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   )
 
-install(DIRECTORY ./
+install(DIRECTORY scripts/
+  USE_SOURCE_PERMISSIONS
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+install(DIRECTORY scripts
+  USE_SOURCE_PERMISSIONS
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  FILES_MATCHING PATTERN "*.xml"
+  )
+
+install(DIRECTORY tmux/
+  USE_SOURCE_PERMISSIONS
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/tmux
+  )
+
+install(FILES plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   )

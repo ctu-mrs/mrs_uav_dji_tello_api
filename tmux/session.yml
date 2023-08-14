@@ -1,24 +1,30 @@
-name: uav
+# do not modify these
 root: ./
-pre_window: export UAV_NAME="uav1"; export RUN_TYPE=uav; export UAV_TYPE=f330; export WORLD_NAME=simulation; export SENSORS=""; export ODOMETRY_TYPE="gps"; export LOGGER_DEBUG=true; export DEBUG=false; export WORLD_FILE=./custom_configs/world.yaml
-startup_window: status
+name: simulation
+socket_name: mrs
+attach: false
+tmux_options: -f /etc/ctu-mrs/tmux.conf
+# you can modify these
+pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export WORLD_FILE=./custom_configs/world.yaml
+startup_window: control
 windows:
   - roscore:
       layout: tiled
       panes:
         - roscore
-  - status:
-      layout: tiled
-      panes:
-        - waitForRos; roslaunch mrs_uav_status status.launch
+        - waitForRos; rosparam set use_sim_time false
   - hw_api:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_uav_dji_tello_api api.launch
+        - waitForTime; roslaunch mrs_uav_dji_tello_api api.launch
+  - status:
+      layout: tiled
+      panes:
+        - waitForHw; roslaunch mrs_uav_status status.launch
   - control:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_uav_general core.launch config_control_manager:=./custom_configs/control_manager.yaml config_uav_manager:=./custom_configs/uav_manager.yaml config_odometry:=./custom_configs/odometry.yaml config_constraint_manager:=./custom_configs/constraint_manager.yaml config_se3_controller:=./custom_configs/se3.yaml
+        - waitForHw; roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_dji_tello_api`/config/mrs_uav_system/tello.yaml custom_config:=./custom_configs/custom_config.yaml
   - takeoff:
       layout: tiled
       panes:
@@ -32,6 +38,10 @@ windows:
   - rviz:
       layout: tiled
       panes:
-        - waitForControl; rosrun rviz rviz -d rviz.rviz
+        - waitForControl; roslaunch mrs_uav_core rviz.launch
         - waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
         - waitForControl; waitForControl; roslaunch mrs_rviz_plugins rviz_interface.launch
+  - layout:
+      layout: tiled
+      panes:
+        - waitForControl; sleep 3; ~/.i3/layout_manager.sh ./layout.json
