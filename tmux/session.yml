@@ -5,7 +5,7 @@ socket_name: mrs
 attach: false
 tmux_options: -f /etc/ctu-mrs/tmux.conf
 # you can modify these
-pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export WORLD_FILE=./custom_configs/world.yaml
+pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export WORLD_FILE=./custom_configs/world.yaml; export UAV_MASS=1.0
 startup_window: control
 windows:
   - roscore:
@@ -30,15 +30,19 @@ windows:
       panes:
         - 'history -s rosservice call /uav1/hw_api/arming 1'
         - 'history -s rosservice call /uav1/uav_manager/midair_activation'
-        - 'history -s rosservice call /uav1/control_manager/eland'
+  - land:
+      layout: tiled
+      panes:
+        - 'history -s rosservice call /uav1/hw_api/arming 0'
   - goto:
       layout: tiled
       panes:
-        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_fcu \"goal: \[1.0, 0.0, 0.0, 0.0\]\"'
+        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_relative \"goal: \[0.0, -0.5, 0.0, 0.0\]\"'
+        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_relative \"goal: \[0.0, 0.5, 0.0, 0.0\]\"'
   - rviz:
       layout: tiled
       panes:
-        - waitForControl; roslaunch mrs_uav_core rviz.launch
+        - waitForControl; rosrun rviz rviz -d ./rviz.rviz
         - waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
         - waitForControl; waitForControl; roslaunch mrs_rviz_plugins rviz_interface.launch
   - layout:

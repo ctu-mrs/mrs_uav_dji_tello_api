@@ -1,3 +1,8 @@
+motor_params:
+  n_motors: 4
+  a: 1.0
+  b: 0.0
+
 mrs_uav_controllers:
 
   se3_controller:
@@ -5,8 +10,8 @@ mrs_uav_controllers:
     position_controller:
 
       translation_gains:
-        p: 2.0
-        d: 0.15
+        p: 1.5 # 2.0
+        d: 0.50 # 0.15
         i: 0.01
 
       heading_gains:
@@ -18,12 +23,11 @@ mrs_uav_managers:
 
   estimation_manager:
 
-    # loaded state estimator plugins
     state_estimators: [
-      "gps_baro",
+      "passthrough",
     ]
 
-    initial_state_estimator: "gps_baro" # will be used as the first state estimator
+    initial_state_estimator: "passthrough" # will be used as the first state estimator
     agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
 
   uav_manager:
@@ -46,44 +50,37 @@ mrs_uav_managers:
 
   constraint_manager:
 
-    constraint_management:
+    slow:
 
-      fallback_constraints:
-        gps_baro: "slow"
+      horizontal:
+        speed: 0.5
+        acceleration: 0.5
+        jerk: 20.0
+        snap: 20.0
 
-    constraints:
+      vertical:
 
-      slow:
-
-        horizontal:
+        ascending:
           speed: 0.5
           acceleration: 0.5
           jerk: 20.0
           snap: 20.0
 
-        vertical:
+        descending:
+          speed: 0.5
+          acceleration: 0.5
+          jerk: 20.0
+          snap: 20.0
 
-          ascending:
-            speed: 0.5
-            acceleration: 0.5
-            jerk: 20.0
-            snap: 20.0
+      heading:
+        speed: 1.0
+        acceleration: 1.0
+        jerk: 10.0
+        snap: 10.0
 
-          descending:
-            speed: 0.5
-            acceleration: 0.5
-            jerk: 20.0
-            snap: 20.0
+      angular_speed:
+        roll: 60.0
+        pitch: 60.0
+        yaw: 10.0
 
-        heading:
-          speed: 1.0
-          acceleration: 1.0
-          jerk: 10.0
-          snap: 10.0
-
-        angular_speed:
-          roll: 60.0
-          pitch: 60.0
-          yaw: 10.0
-
-        tilt: deg(60)
+      tilt: deg(60)

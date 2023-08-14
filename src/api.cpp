@@ -10,7 +10,6 @@
 #include <mrs_lib/publisher_handler.h>
 #include <mrs_lib/subscribe_handler.h>
 #include <mrs_lib/service_client_handler.h>
-#include <mrs_lib/gps_conversions.h>
 
 #include <std_msgs/Float64.h>
 #include <std_srvs/SetBool.h>
@@ -97,12 +96,6 @@ private:
 
   ros::Time last_update_;
 
-  // | -------------------------- amsl -------------------------- |
-
-  double _utm_x_;
-  double _utm_y_;
-  double _amsl_;
-
   // | ----------------------- publishers ----------------------- |
 
   mrs_lib::PublisherHandler<mrs_msgs::HwApiVelocityHdgRateCmd> ph_cmd_;
@@ -147,10 +140,6 @@ void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared
   // | ------------------- loading parameters ------------------- |
 
   mrs_lib::ParamLoader param_loader(nh_, "MrsUavHwApi");
-
-  param_loader.loadParam("gnss/utm_x", _utm_x_);
-  param_loader.loadParam("gnss/utm_y", _utm_y_);
-  param_loader.loadParam("gnss/amsl", _amsl_);
 
   if (!param_loader.loadedSuccessfully()) {
     ROS_ERROR("[MrsUavDjiTelloApi]: Could not load all parameters!");
@@ -227,25 +216,10 @@ mrs_msgs::HwApiCapabilities MrsUavDjiTelloApi::getCapabilities() {
   capabilities.api_name = "TelloApi";
   capabilities.stamp    = ros::Time::now();
 
-  capabilities.accepts_actuator_cmd              = false;
-  capabilities.accepts_control_group_cmd         = false;
-  capabilities.accepts_attitude_rate_cmd         = false;
-  capabilities.accepts_attitude_cmd              = false;
-  capabilities.accepts_acceleration_hdg_rate_cmd = false;
-  capabilities.accepts_acceleration_hdg_cmd      = false;
-  capabilities.accepts_velocity_hdg_rate_cmd     = true;
-  capabilities.accepts_velocity_hdg_cmd          = false;
-  capabilities.accepts_position_cmd              = false;
+  capabilities.accepts_velocity_hdg_rate_cmd = true;
 
-  capabilities.produces_distance_sensor      = false;
-  capabilities.produces_gnss                 = true;
-  capabilities.produces_imu                  = false;
-  capabilities.produces_altitude             = true;
-  capabilities.produces_magnetometer_heading = false;
-  capabilities.produces_odometry             = true;
-  capabilities.produces_position             = true;
-  capabilities.produces_velocity             = true;
-  capabilities.produces_rc_channels          = false;
+  capabilities.produces_odometry      = true;
+  capabilities.produces_battery_state = true;
 
   return capabilities;
 }
@@ -596,14 +570,15 @@ void MrsUavDjiTelloApi::publishOdom(void) {
 
   nav_msgs::Odometry odom;
 
-  odom.header = pose.header;
+  odom.header          = pose.header;
+  odom.header.frame_id = common_handlers_->getWorldFrameName();
   /* odom.pose.pose.position.x = pos_[0]; */
   /* odom.pose.pose.position.y = pos_[1]; */
   /* odom.pose.pose.position.z = pos_[2]; */
 
   odom.pose.pose = pose.pose;
 
-  odom.child_frame_id = twist.header.frame_id;
+  odom.child_frame_id = common_handlers_->getUavName() + "/" + common_handlers_->getBodyFrameName();
   odom.twist.twist    = twist.twist;
 
   odom.twist.twist.angular.x = 0;
@@ -614,53 +589,66 @@ void MrsUavDjiTelloApi::publishOdom(void) {
 
   // | ----------------- publish the orientation ---------------- |
 
-  geometry_msgs::QuaternionStamped quat;
+  /* geometry_msgs::QuaternionStamped quat; */
 
-  quat.header     = pose.header;
-  quat.quaternion = pose.pose.orientation;
+  /* quat.header     = pose.header; */
+  /* quat.quaternion = pose.pose.orientation; */
 
-  common_handlers_->publishers.publishOrientation(quat);
+  /* common_handlers_->publishers.publishOrientation(quat); */
+
+  // | ---------------- publish angular velocity ---------------- |
+
+  /* geometry_msgs::Vector3Stamped angular_velocity; */
+
+  /* angular_velocity.header.stamp    = pose.header.stamp; */
+  /* angular_velocity.header.frame_id = common_handlers_->getUavName() + "/" + common_handlers_->getBodyFrameName(); */
+
+  /* angular_velocity.vector.x = twist.twist.angular.x; */
+  /* angular_velocity.vector.y = twist.twist.angular.y; */
+  /* angular_velocity.vector.z = twist.twist.angular.z; */
+
+  /* common_handlers_->publishers.publishAngularVelocity(angular_velocity); */
 
   // | ------------------ publish emulated gnss ----------------- |
 
-  {
-    double lat;
-    double lon;
+  /* { */
+  /*   double lat; */
+  /*   double lon; */
 
-    mrs_lib::UTMtoLL(pose.pose.position.y + _utm_y_, pose.pose.position.x + _utm_x_, "32T", lat, lon);
+  /*   mrs_lib::UTMtoLL(pose.pose.position.y + _utm_y_, pose.pose.position.x + _utm_x_, "32T", lat, lon); */
 
-    sensor_msgs::NavSatFix gnss;
+  /*   sensor_msgs::NavSatFix gnss; */
 
-    gnss.header.stamp = pose.header.stamp;
+  /*   gnss.header.stamp = pose.header.stamp; */
 
-    gnss.latitude  = lat;
-    gnss.longitude = lon;
-    gnss.altitude  = pose.pose.position.z + _amsl_;
+  /*   gnss.latitude  = lat; */
+  /*   gnss.longitude = lon; */
+  /*   gnss.altitude  = pose.pose.position.z + _amsl_; */
 
-    common_handlers_->publishers.publishGNSS(gnss);
-  }
+  /*   common_handlers_->publishers.publishGNSS(gnss); */
+  /* } */
 
   // | -------------------- publish altitude -------------------- |
 
 
-  mrs_msgs::HwApiAltitude altitude;
+  /* mrs_msgs::HwApiAltitude altitude; */
 
-  altitude.stamp = pose.header.stamp;
+  /* altitude.stamp = pose.header.stamp; */
 
-  altitude.amsl = pose.pose.position.z + _amsl_;
+  /* altitude.amsl = pose.pose.position.z + _amsl_; */
 
-  common_handlers_->publishers.publishAltitude(altitude);
+  /* common_handlers_->publishers.publishAltitude(altitude); */
 
   // | --------------------- publish heading -------------------- |
 
-  double heading = mrs_lib::AttitudeConverter(pose.pose.orientation).getHeading();
+  /* double heading = mrs_lib::AttitudeConverter(pose.pose.orientation).getHeading(); */
 
-  mrs_msgs::Float64Stamped hdg;
+  /* mrs_msgs::Float64Stamped hdg; */
 
-  hdg.header.stamp = ros::Time::now();
-  hdg.value        = heading;
+  /* hdg.header.stamp = ros::Time::now(); */
+  /* hdg.value        = heading; */
 
-  common_handlers_->publishers.publishMagnetometerHeading(hdg);
+  /* common_handlers_->publishers.publishMagnetometerHeading(hdg); */
 }
 
 //}
