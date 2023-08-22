@@ -62,14 +62,14 @@ class TellopyWrapper:
 
             ## | ------------------------- height ------------------------- |
 
-            # try:
-            #     height = float(self.tello.query_distance_tof()) / 100.0
-            #     height_msg = Float64()
-            #     height_msg.data = height
-            #     self.publisher_height.publish(height_msg)
-            # except:
-            #     rospy.logerr_throttle(1.0, 'failed to query height')
-            #     pass
+            try:
+                height = float(self.flight_data.height)
+                height_msg = Float64()
+                height_msg.data = height
+                self.publisher_height.publish(height_msg)
+            except:
+                rospy.logerr_throttle(1.0, 'failed to query height')
+                pass
 
             self.rate.sleep();
 

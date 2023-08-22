@@ -216,8 +216,10 @@ mrs_msgs::HwApiCapabilities MrsUavDjiTelloApi::getCapabilities() {
 
   capabilities.accepts_velocity_hdg_rate_cmd = true;
 
-  capabilities.produces_odometry      = true;
-  capabilities.produces_battery_state = true;
+  capabilities.produces_odometry        = true;
+  capabilities.produces_battery_state   = true;
+  capabilities.produces_orientation     = true;
+  capabilities.produces_distance_sensor = true;
 
   return capabilities;
 }
@@ -477,8 +479,6 @@ void MrsUavDjiTelloApi::callbackHeight(const std_msgs::Float64::ConstPtr msg) {
 
   ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting height");
 
-  // | --------------- publish the local odometry --------------- |
-
   sensor_msgs::Range range_out;
   range_out.min_range = 0.1;
   range_out.max_range = 10.0;
@@ -579,12 +579,12 @@ void MrsUavDjiTelloApi::publishOdom(void) {
 
   // | ----------------- publish the orientation ---------------- |
 
-  /* geometry_msgs::QuaternionStamped quat; */
+  geometry_msgs::QuaternionStamped quat;
 
-  /* quat.header     = pose.header; */
-  /* quat.quaternion = pose.pose.orientation; */
+  quat.header     = pose.header;
+  quat.quaternion = pose.pose.orientation;
 
-  /* common_handlers_->publishers.publishOrientation(quat); */
+  common_handlers_->publishers.publishOrientation(quat);
 
   // | ---------------- publish angular velocity ---------------- |
 

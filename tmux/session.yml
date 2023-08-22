@@ -5,7 +5,7 @@ socket_name: mrs
 attach: false
 tmux_options: -f /etc/ctu-mrs/tmux.conf
 # you can modify these
-pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export WORLD_FILE=./custom_configs/world.yaml; export UAV_MASS=1.0
+pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export UAV_MASS=1.0
 startup_window: control
 windows:
   - roscore:
@@ -24,7 +24,7 @@ windows:
   - control:
       layout: tiled
       panes:
-        - waitForHw; roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_dji_tello_api`/config/mrs_uav_system/tello.yaml custom_config:=./custom_configs/custom_config.yaml
+        - waitForHw; roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_dji_tello_api`/config/mrs_uav_system/tello.yaml custom_config:=./config/custom_config.yaml world_config:=./config/world.yaml network_config:=./config/network_config.yaml
   - takeoff:
       layout: tiled
       panes:
