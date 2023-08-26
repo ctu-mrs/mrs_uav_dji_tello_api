@@ -6,6 +6,12 @@ import time
 import sys
 import numpy as np
 
+import av
+import cv2
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+import traceback
+
 import tellopy
 
 from sensor_msgs.msg import BatteryState as BatteryState
@@ -41,6 +47,9 @@ class TellopyWrapper:
         self.publisher_pose = rospy.Publisher('~pose_out', PoseStamped, queue_size=1)
         self.publisher_height = rospy.Publisher('~height_out', Float64, queue_size=1)
         self.publisher_armed = rospy.Publisher('~armed_out', Bool, queue_size=1)
+        self.publisher_image = rospy.Publisher("~image_out", Image)
+
+        self.bridge = CvBridge()
 
         self.service_arm = rospy.Service('~arm_in', SetBoolSrv, self.callbackArm)
         self.service_arm = rospy.Service('~throw_in', TriggerSrv, self.callbackThrow)
@@ -52,6 +61,7 @@ class TellopyWrapper:
 
         self.tello = tellopy.Tello()
         self.tello.connect()
+
         self.tello.subscribe(self.tello.EVENT_FLIGHT_DATA, self.handler)
         self.tello.subscribe(self.tello.EVENT_LOG_DATA, self.handler)
         self.tello.fast_mode = False
@@ -61,18 +71,37 @@ class TellopyWrapper:
         self.taking_off = False
         self.is_flying = False
 
+        retry = 3
+        container = None
+        while container is None and 0 < retry:
+            retry -= 1
+            try:
+                container = av.open(self.tello.get_video_stream())
+            except av.AVError as ave:
+                print(ave)
+
         while not rospy.is_shutdown():
 
             ## | ------------------------- height ------------------------- |
 
-            try:
-                height = float(self.flight_data.height)
-                height_msg = Float64()
-                height_msg.data = height
-                self.publisher_height.publish(height_msg)
-            except:
-                rospy.logerr_throttle(1.0, 'failed to query height')
-                pass
+            # try:
+            #     height = float(self.flight_data.height)
+            #     height_msg = Float64()
+            #     height_msg.data = height
+            #     self.publisher_height.publish(height_msg)
+            # except:
+            #     rospy.logerr_throttle(1.0, 'failed to query height')
+            #     pass
+
+            for frame in container.decode(video=0):
+
+                image = cv2.cvtColor(np.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+
+                try:
+                    image_message = self.bridge.cv2_to_imgmsg(image, encoding="bgr8")
+                    self.publisher_image.publish(image_message)
+                except CvBridgeError as e:
+                  print(e)
 
             self.rate.sleep();
 
@@ -172,7 +201,7 @@ class TellopyWrapper:
             self.flight_data = data
         elif event is drone.EVENT_LOG_DATA:
 
-            rospy.loginfo('{}'.format(data))
+            # rospy.loginfo('{}'.format(data))
 
             rospy.loginfo_once('getting log data')
             self.log_data = data
