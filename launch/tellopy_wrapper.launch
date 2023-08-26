@@ -14,6 +14,7 @@
       <remap from="~armed_out" to="~armed" />
 
       <remap from="~arm_in" to="~arm" />
+      <remap from="~throw_in" to="~throw" />
       <remap from="~cmd_in" to="~cmd" />
 
     </node>

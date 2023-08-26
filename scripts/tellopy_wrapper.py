@@ -14,6 +14,8 @@ from std_msgs.msg import Float64 as Float64
 from geometry_msgs.msg import TwistStamped as TwistStamped
 from geometry_msgs.msg import PoseStamped as PoseStamped
 
+from std_srvs.srv import Trigger as TriggerSrv
+from std_srvs.srv import TriggerResponse as TriggerSrvResponse
 from std_srvs.srv import SetBool as SetBoolSrv
 from std_srvs.srv import SetBoolResponse as SetBoolSrvResponse
 
@@ -41,6 +43,7 @@ class TellopyWrapper:
         self.publisher_armed = rospy.Publisher('~armed_out', Bool, queue_size=1)
 
         self.service_arm = rospy.Service('~arm_in', SetBoolSrv, self.callbackArm)
+        self.service_arm = rospy.Service('~throw_in', TriggerSrv, self.callbackThrow)
 
         self.sub_cmd = rospy.Subscriber('~cmd_in', HwApiVelocityHdgRateCmd, self.callbackCmd, queue_size=1)
 
@@ -75,6 +78,25 @@ class TellopyWrapper:
 
         self.tello.quit()
 
+    def callbackThrow(self, req):
+
+        resp = TriggerSrvResponse()
+
+        try:
+            self.tello.throw_and_go()
+            self.is_flying = True
+
+            resp.message = "armed"
+            resp.success = True
+
+        except:
+
+            resp.message = "failed"
+            resp.success = False
+
+            pass
+
+        return resp
 
     def callbackArm(self, req):
 

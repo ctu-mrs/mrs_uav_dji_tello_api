@@ -28,6 +28,7 @@ windows:
   - takeoff:
       layout: tiled
       panes:
+        - 'history -s rosservice call /uav1/tellopy_wrapper/throw'
         - 'history -s rosservice call /uav1/hw_api/arming 1'
         - 'history -s rosservice call /uav1/uav_manager/midair_activation'
   - land:
