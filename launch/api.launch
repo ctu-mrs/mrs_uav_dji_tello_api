@@ -23,6 +23,8 @@
 
   <group ns="$(arg UAV_NAME)">
 
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_tf" args="0 0 0 -1.57 0 -1.8 $(arg UAV_NAME)/fcu $(arg UAV_NAME)/rgb" />
+
     <node pkg="nodelet" type="nodelet" name="hw_api" args="$(arg nodelet) mrs_uav_hw_api/HwApiManager $(arg nodelet_manager)" output="screen" launch-prefix="$(arg launch_prefix)">
 
       <rosparam file="$(find mrs_uav_hw_api)/config/hw_api.yaml" />
@@ -43,6 +45,7 @@
       <remap from="~cmd_out" to="tellopy_wrapper/cmd" />
       <remap from="~armed_in" to="tellopy_wrapper/armed" />
       <remap from="~height_in" to="tellopy_wrapper/height" />
+      <remap from="~imu_in" to="tellopy_wrapper/imu" />
 
     </node>
 

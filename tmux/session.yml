@@ -13,6 +13,10 @@ windows:
       panes:
         - roscore
         - waitForRos; rosparam set use_sim_time false
+  - rosbag:
+      layout: tiled
+      panes:
+        - waitForOffboard; ./record.sh
   - hw_api:
       layout: tiled
       panes:
@@ -21,6 +25,14 @@ windows:
       layout: tiled
       panes:
         - waitForHw; roslaunch mrs_uav_status status.launch
+  - pydnet:
+      layout: tiled
+      panes:
+        - waitForHw; cd ~/git/pydnet/scripts/ && ./demo.py
+  - mapping:
+      layout: tiled
+      panes:
+        - waitForHw; roslaunch octomap_mapping_planning tello.launch
   - control:
       layout: tiled
       panes:
@@ -29,6 +41,7 @@ windows:
       layout: tiled
       panes:
         - 'history -s rosservice call /uav1/tellopy_wrapper/throw'
+        - 'history -s rosservice call /uav1/tellopy_wrapper/zero'
         - 'history -s rosservice call /uav1/hw_api/arming 1'
         - 'history -s rosservice call /uav1/uav_manager/midair_activation'
   - land:

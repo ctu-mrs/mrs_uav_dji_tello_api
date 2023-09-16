@@ -7,15 +7,20 @@
 
     <node name="tellopy_wrapper" pkg="mrs_uav_dji_tello_api" type="tellopy_wrapper.py" output="screen">
 
+      <param name="uav_name" value="$(arg UAV_NAME)" />
+
       <remap from="~battery_out" to="~battery" />
       <remap from="~height_out" to="~height" />
       <remap from="~pose_out" to="~pose" />
       <remap from="~twist_out" to="~twist" />
       <remap from="~armed_out" to="~armed" />
-      <remap from="~image_out" to="~rgb" />
+      <remap from="~image_raw_out" to="~rgb/image_raw" />
+      <remap from="~camera_info_out" to="~rgb/camera_info" />
+      <remap from="~imu_out" to="~imu" />
 
       <remap from="~arm_in" to="~arm" />
       <remap from="~throw_in" to="~throw" />
+      <remap from="~zero_in" to="~zero" />
       <remap from="~cmd_in" to="~cmd" />
 
     </node>

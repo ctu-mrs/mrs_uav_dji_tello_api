@@ -15,6 +15,8 @@ import traceback
 import tellopy
 
 from sensor_msgs.msg import BatteryState as BatteryState
+from sensor_msgs.msg import CameraInfo
+from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry as Odometry
 from std_msgs.msg import Float64 as Float64
 from geometry_msgs.msg import TwistStamped as TwistStamped
@@ -42,17 +44,26 @@ class TellopyWrapper:
 
         rospy.init_node('tellopy_wrapper', anonymous=True)
 
+        self.uav_name = rospy.get_param("~uav_name")
+
+        self.offset_x = 0
+        self.offset_y = 0
+        self.offset_z = 0
+
         self.publisher_battery = rospy.Publisher('~battery_out', BatteryState, queue_size=1)
         self.publisher_twist = rospy.Publisher('~twist_out', TwistStamped, queue_size=1)
+        self.publisher_imu = rospy.Publisher('~imu_out', Imu, queue_size=1)
         self.publisher_pose = rospy.Publisher('~pose_out', PoseStamped, queue_size=1)
         self.publisher_height = rospy.Publisher('~height_out', Float64, queue_size=1)
         self.publisher_armed = rospy.Publisher('~armed_out', Bool, queue_size=1)
-        self.publisher_image = rospy.Publisher("~image_out", Image)
+        self.publisher_image = rospy.Publisher("~image_raw_out", Image, queue_size=10)
+        self.publisher_camera_info = rospy.Publisher("~camera_info_out", CameraInfo, queue_size=1)
 
         self.bridge = CvBridge()
 
         self.service_arm = rospy.Service('~arm_in', SetBoolSrv, self.callbackArm)
-        self.service_arm = rospy.Service('~throw_in', TriggerSrv, self.callbackThrow)
+        self.service_throw = rospy.Service('~throw_in', TriggerSrv, self.callbackThrow)
+        self.service_zero = rospy.Service('~zero_in', TriggerSrv, self.callbackZero)
 
         self.sub_cmd = rospy.Subscriber('~cmd_in', HwApiVelocityHdgRateCmd, self.callbackCmd, queue_size=1)
 
@@ -71,14 +82,14 @@ class TellopyWrapper:
         self.taking_off = False
         self.is_flying = False
 
-        retry = 3
+        retry = 5
         container = None
         while container is None and 0 < retry:
             retry -= 1
             try:
                 container = av.open(self.tello.get_video_stream())
             except av.AVError as ave:
-                print(ave)
+                rospy.logerr('Could not open the video stream')
 
         while not rospy.is_shutdown():
 
@@ -99,9 +110,11 @@ class TellopyWrapper:
 
                 try:
                     image_message = self.bridge.cv2_to_imgmsg(image, encoding="bgr8")
+                    image_message.header.frame_id = self.uav_name+"/rgb"
+                    image_message.header.stamp = rospy.Time.now() - rospy.Time(0.01)
                     self.publisher_image.publish(image_message)
                 except CvBridgeError as e:
-                  print(e)
+                    rospy.logerr('Could not parse and publish the camera image')
 
             self.rate.sleep();
 
@@ -124,6 +137,19 @@ class TellopyWrapper:
             resp.success = False
 
             pass
+
+        return resp
+
+    def callbackZero(self, req):
+
+        resp = TriggerSrvResponse()
+
+        self.offset_x = -self.position_x
+        self.offset_y = -self.position_y
+        self.offset_z = -self.position_z
+
+        resp.message = "zeroed"
+        resp.success = True
 
         return resp
 
@@ -159,8 +185,28 @@ class TellopyWrapper:
         return resp
 
     def mainTimer(self, event):
-        pass
 
+        rospy.loginfo_once('main timer spinning')
+
+        D = [-0.030801026384372737, 0.12074238137787453, 0.007389158172456661, 0.004696793411715399, 0.0]
+        K = [933.5640667549508, 0.0, 500.5657553739987, 0.0, 931.5001605952165, 379.0130687255228, 0.0, 0.0, 1.0]
+        R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        P = [942.8484497070312, 0.0, 503.21163889504896, 0.0, 0.0, 939.0140380859375, 382.6534805428564, 0.0, 0.0, 0.0, 1.0, 0.0]
+
+        ## | ------------------- publish camera info ------------------ |
+
+        camera_info_msg = CameraInfo()
+        camera_info_msg.header.frame_id = "tello_camera"
+        camera_info_msg.header.stamp = rospy.Time.now()
+        camera_info_msg.width = 960
+        camera_info_msg.height = 720
+        camera_info_msg.K = K
+        camera_info_msg.D = D
+        camera_info_msg.R = R
+        camera_info_msg.P = P
+        camera_info_msg.distortion_model = "plumb_bob"
+
+        self.publisher_camera_info.publish(camera_info_msg)
 
     def diagTimer(self, event):
 
@@ -201,7 +247,7 @@ class TellopyWrapper:
             self.flight_data = data
         elif event is drone.EVENT_LOG_DATA:
 
-            # rospy.loginfo('{}'.format(data))
+            rospy.loginfo('{}'.format(data))
 
             rospy.loginfo_once('getting log data')
             self.log_data = data
@@ -210,9 +256,13 @@ class TellopyWrapper:
             pose.header.stamp = rospy.Time.now()
             pose.header.frame_id = "world"
 
-            pose.pose.position.x = data.mvo.pos_x
-            pose.pose.position.y = -data.mvo.pos_y
-            pose.pose.position.z = -data.mvo.pos_z
+            pose.pose.position.x = data.mvo.pos_x + self.offset_x
+            pose.pose.position.y = -data.mvo.pos_y + self.offset_y
+            pose.pose.position.z = -data.mvo.pos_z + self.offset_z
+
+            self.position_x = data.mvo.pos_x
+            self.position_y = -data.mvo.pos_y
+            self.position_z = -data.mvo.pos_z
 
             angles = euler_from_quaternion([data.imu.q0, data.imu.q1, data.imu.q2, data.imu.q3])
 
@@ -235,6 +285,26 @@ class TellopyWrapper:
             twist.twist.linear.z = -(data.mvo.vel_z/10.0)
 
             self.publisher_twist.publish(twist)
+
+            imu_msg = Imu()
+
+            imu_msg.header.stamp = rospy.Time.now()
+            imu_msg.header.frame_id = self.uav_name+"/fcu"
+
+            imu_msg.orientation.w=quat[0]
+            imu_msg.orientation.x=quat[1]
+            imu_msg.orientation.y=quat[2]
+            imu_msg.orientation.z=quat[3]
+
+            imu_msg.angular_velocity.x = data.imu.gyro_x
+            imu_msg.angular_velocity.y = -data.imu.gyro_y
+            imu_msg.angular_velocity.z = -data.imu.gyro_z
+
+            imu_msg.linear_acceleration.x = data.imu.acc_x*9.81
+            imu_msg.linear_acceleration.y = -data.imu.acc_y*9.81
+            imu_msg.linear_acceleration.z = -data.imu.acc_z*9.81
+
+            self.publisher_imu.publish(imu_msg)
 
         else:
             print('event="%s" data=%s' % (event.getname(), str(data)))

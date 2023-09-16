@@ -82,6 +82,9 @@ private:
   mrs_lib::SubscribeHandler<sensor_msgs::BatteryState> sh_battery_;
   void                                                 callbackBattery(const sensor_msgs::BatteryState::ConstPtr msg);
 
+  mrs_lib::SubscribeHandler<sensor_msgs::Imu> sh_imu_;
+  void                                        callbackImu(const sensor_msgs::Imu::ConstPtr msg);
+
   mrs_lib::SubscribeHandler<std_msgs::Float64> sh_height_;
   void                                         callbackHeight(const std_msgs::Float64::ConstPtr msg);
 
@@ -163,6 +166,8 @@ void MrsUavDjiTelloApi::initialize(const ros::NodeHandle &parent_nh, std::shared
 
   sh_battery_ = mrs_lib::SubscribeHandler<sensor_msgs::BatteryState>(shopts, "battery_in", &MrsUavDjiTelloApi::callbackBattery, this);
 
+  sh_imu_ = mrs_lib::SubscribeHandler<sensor_msgs::Imu>(shopts, "imu_in", &MrsUavDjiTelloApi::callbackImu, this);
+
   sh_height_ = mrs_lib::SubscribeHandler<std_msgs::Float64>(shopts, "height_in", &MrsUavDjiTelloApi::callbackHeight, this);
 
   // | --------------------- service clients -------------------- |
@@ -220,6 +225,7 @@ mrs_msgs::HwApiCapabilities MrsUavDjiTelloApi::getCapabilities() {
   capabilities.produces_battery_state   = true;
   capabilities.produces_orientation     = true;
   capabilities.produces_distance_sensor = true;
+  capabilities.produces_imu             = true;
 
   return capabilities;
 }
@@ -528,6 +534,21 @@ void MrsUavDjiTelloApi::callbackTwist(const geometry_msgs::TwistStamped::ConstPt
   mrs_lib::set_mutexed(mutex_twist_, *twist, twist_);
 
   publishOdom();
+}
+
+//}
+
+/* calbackImu() //{ */
+
+void MrsUavDjiTelloApi::callbackImu(const sensor_msgs::Imu::ConstPtr msg) {
+
+  if (!is_initialized_) {
+    return;
+  }
+
+  ROS_INFO_ONCE("[MrsUavDjiTelloApi]: getting imu");
+
+  common_handlers_->publishers.publishIMU(*msg);
 }
 
 //}
