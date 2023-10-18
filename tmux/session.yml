@@ -25,14 +25,6 @@ windows:
       layout: tiled
       panes:
         - waitForHw; roslaunch mrs_uav_status status.launch
-  - pydnet:
-      layout: tiled
-      panes:
-        - waitForHw; cd ~/git/pydnet/scripts/ && ./demo.py
-  - mapping:
-      layout: tiled
-      panes:
-        - waitForHw; roslaunch octomap_mapping_planning tello.launch
   - control:
       layout: tiled
       panes:
