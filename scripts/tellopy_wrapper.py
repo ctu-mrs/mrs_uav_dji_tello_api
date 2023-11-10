@@ -1,12 +1,24 @@
 #!/usr/bin/python3
 
+def install_and_import(package):
+    import importlib
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        print("Missing the pip3 dependency '{}', installing it.".format(package))
+        import subprocess
+        subprocess.call([sys.executable, '-m', 'pip', 'install', package])
+    finally:
+        globals()[package] = importlib.import_module(package)
+
 import rospy
 import rosnode
 import time
 import sys
 import numpy as np
 
-import av
+install_and_import("av")
+
 import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -85,7 +97,9 @@ class TellopyWrapper:
         retry = 5
         container = None
         while container is None and 0 < retry:
+
             retry -= 1
+
             try:
                 container = av.open(self.tello.get_video_stream())
             except av.AVError as ave:

@@ -24,7 +24,6 @@
   <depend>rospy</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>pip-av</depend>
 
   <export>
     <mrs_uav_hw_api plugin="${prefix}/plugins.xml" />
