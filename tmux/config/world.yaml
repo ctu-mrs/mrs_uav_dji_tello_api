@@ -12,23 +12,23 @@ safety_area:
   horizontal:
 
     # the frame of reference in which the points are expressed
-    frame_name: "world_origin"
+    frame_name: "passthrough_origin"
 
     # polygon
     #
     # x, y [m] for any frame_name except latlon_origin
     # x = latitude, y = longitude [deg]  for frame_name=="latlon_origin"
     points: [
-      -50, -50,
-      50,  -50,
-      50,  50,
-      -50, 50,
+      -10, -10,
+      10,  -10,
+      10,  10,
+      -10, 10,
     ]
 
   vertical:
 
     # the frame of reference in which the max&min z is expressed
-    frame_name: "world_origin"
+    frame_name: "passthrough_origin"
 
-    max_z: 15.0
-    min_z: 0.5
+    max_z: 2.0
+    min_z: -2.0
