@@ -32,12 +32,20 @@ windows:
       layout: tiled
       panes:
         - ros2 run mrs_uav_status status.sh
+  - flame:
+      layout: tiled
+      panes:
+        - ros2 launch flame_ros flame_ros_sim.launch.py cam_type:=tellopy_wrapper/rgb
+  - static_tf:
+      layout: tiled
+      panes:
+        - ./config/static_tfs.sh
   - takeoff:
       layout: even-vertical
       panes:
-        - 'history -s ros2 service call /uav1/hw_api/arming std_srvs/srv/SetBool "{data: 1}"'
-        - 'history -s ros2 service call /uav1/tellopy_wrapper/zero std_srvs/srv/Trigger "{}"'
-        - 'history -s ros2 service call /uav1/uav_manager/midair_activation std_srvs/srv/Trigger "{}"'
+        - 'history -s ./arming.sh'
+        - "history -s ros2 service call /uav1/tellopy_wrapper/zero std_srvs/srv/Trigger '{}'"
+        - "history -s ros2 service call /uav1/uav_manager/midair_activation std_srvs/srv/Trigger '{}'"
   - throw_and_go:
       layout: even-vertical
       panes:

@@ -6,20 +6,23 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
+        - /TF1/Frames1
         - /TF1/Tree1
         - /MpcTracker1
         - /EstimationManager1
         - /ControlManager1
         - /ControlManager1/control_reference1/Topic1
         - /ControlManager1/trajectory_original1
-        - /TrajectoryGeneration1
         - /TrajectoryGeneration1/path_final1
         - /TrajectoryGeneration1/path_final1/Namespaces1
         - /TrajectoryGeneration1/path_original1
         - /TrajectoryGeneration1/path_original1/Topic1
         - /TrajectoryGeneration1/path_original1/Namespaces1
+        - /PointCloud21
+        - /TexturedMeshDisplay1
       Splitter Ratio: 0.7176470756530762
-    Tree Height: 345
+    Tree Height: 597
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -83,8 +86,8 @@ Visualization Manager:
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
-        All Enabled: true
-      Marker Scale: 1
+        All Enabled: false
+      Marker Scale: 10
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -227,7 +230,7 @@ Visualization Manager:
           Enabled: true
           Name: safety_area_markers
           Namespaces:
-            "": true
+            {}
           Topic:
             Depth: 5
             Durability Policy: Volatile
@@ -239,7 +242,7 @@ Visualization Manager:
           Enabled: true
           Name: safety_area_coordinates
           Namespaces:
-            "": true
+            {}
           Topic:
             Depth: 5
             Durability Policy: Volatile
@@ -318,10 +321,71 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: TrajectoryGeneration
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /uav1/tellopy_wrapper/rgb/image_raw
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 2.133406400680542
+        Min Value: -5.855246067047119
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /uav1/flame/cloud
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: mrs_rviz_plugins/TexturedMeshDisplay
+      Enabled: true
+      Name: TexturedMeshDisplay
+      Normal Size: 0.05000000074505806
+      Phong Shading: true
+      Polygon Mode: ""
+      PolygonMesh Topic: /uav1/flame/mesh
+      Queue Size: 25
+      Scene Color Scale: 1
+      Shader Program: ""
+      Show Normals: false
+      Texture Transport Hint: raw
+      Texture topic: /uav1/flame/debug/features
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
-    Fixed Frame: uav1/fixed_origin
+    Fixed Frame: uav1/local_origin
     Frame Rate: 30
   Name: root
   Tools:
@@ -364,7 +428,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 11.191307067871094
+      Distance: 5.853334426879883
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -379,18 +443,20 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3153984844684601
+      Pitch: 0.3653984069824219
       Target Frame: uav1/fcu
       Value: Orbit (rviz)
-      Yaw: 0.3740334212779999
+      Yaw: 2.7040457725524902
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 564
+  Height: 1153
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000015600000196fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000196000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f00000569fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d00000569000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000003a80000003efc0100000002fb0000000800540069006d00650100000000000003a80000026300fffffffb0000000800540069006d006501000000000000045000000000000000000000024c0000019600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd0000000400000000000002e5000003e3fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000292000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d00610067006501000002d50000014b0000001600fffffffb0000000a0049006d0061006700650100000260000001c00000000000000000000000010000010f00000569fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d00000569000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d00650100000000000007800000026300fffffffb0000000800540069006d0065010000000000000450000000000000000000000495000003e300000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -399,6 +465,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 936
-  X: 12
-  Y: 35
+  Width: 1920
+  X: 0
+  Y: 47

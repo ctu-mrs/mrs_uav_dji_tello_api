@@ -31,10 +31,10 @@ class Goto(Node):
 
         request = ReferenceStampedSrv.Request()
         request.header.frame_id = "fcu_untilted"
-        request.reference.position.x = 5.0
+        request.reference.position.x = 0.5
         request.reference.position.y = 0.0
         request.reference.position.z = 0.0
-        request.reference.heading = 1.5
+        request.reference.heading = 0.0
 
         self.get_logger().info('Calling service')
 

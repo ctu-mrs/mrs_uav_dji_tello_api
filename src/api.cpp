@@ -388,6 +388,8 @@ std::tuple<bool, std::string> Api::callbackArming([[maybe_unused]] const bool &r
 
   auto srv_out = std::make_shared<std_srvs::srv::SetBool::Request>();
 
+  srv_out->data = request;
+
   if (!request) {
     offboard_ = false;
   }

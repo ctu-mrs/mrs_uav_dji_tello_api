@@ -10,6 +10,7 @@ import numpy as np
 import av
 import cv2
 
+from rclpy.duration import Duration
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
@@ -128,7 +129,8 @@ class TellopyWrapperNode(Node):
             try:
                 image_message = self.bridge.cv2_to_imgmsg(image, encoding="bgr8")
                 image_message.header.frame_id = str(self.uav_name) + "/rgb"
-                image_message.header.stamp = self.get_clock().now().to_msg()
+                new_time = self.get_clock().now() - Duration(seconds=0.1)
+                image_message.header.stamp = new_time.to_msg()
 
                 self.publisher_image.publish(image_message)
 
@@ -176,6 +178,8 @@ class TellopyWrapperNode(Node):
 
     def callback_zero(self, request, response):
 
+        self.get_logger().info('zeroing')
+
         self.offset_x = -self.position_x
         self.offset_y = -self.position_y
         self.offset_z = -self.position_z
@@ -188,7 +192,13 @@ class TellopyWrapperNode(Node):
     # #{callback_arm()
 
     def callback_arm(self, request, response):
+
+        self.get_logger().info('callback arm')
+
         if request.data:
+
+            self.get_logger().info('taking off')
+
             try:
                 self.is_flying = True
                 self.tello.takeoff()
@@ -197,12 +207,16 @@ class TellopyWrapperNode(Node):
             response.message = "armed"
             response.success = True
         else:
+
+            self.get_logger().info('landing')
+
             try:
                 self.tello.land()
             except Exception as e:
                 pass
             response.message = "disarmed"
             response.success = True
+
         return response
 
     # #} end of callback_arm()
