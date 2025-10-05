@@ -14,6 +14,10 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>python3</exec_depend>
+  <exec_depend>setuptools</exec_depend> 
+
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>geometry_msgs</depend>
@@ -29,6 +33,8 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>eigen</depend>
+  <depend>python3-av</depend>
+  <depend>tf-transformations</depend>
 
   <depend>backward_ros</depend>
 

@@ -5,58 +5,50 @@ socket_name: mrs
 attach: false
 tmux_options: -f /etc/ctu-mrs/tmux.conf
 # you can modify these
-pre_window: export UAV_NAME=uav1; export RUN_TYPE=realworld; export UAV_TYPE=tello; export UAV_MASS=1.0
-startup_window: control
+startup_window: status
+pre_window: export UAV_NAME=uav1;
+            export PLATFORM_CONFIG=`ros2 pkg prefix mrs_uav_dji_tello_api`/share/mrs_uav_dji_tello_api/config/mrs_uav_system/platform_config.yaml;
+            export USE_SIM_TIME="false";
+            export RMW_IMPLEMENTATION=rmw_zenoh_cpp
 windows:
-  - roscore:
+  - router:
       layout: tiled
       panes:
-        - roscore
-        - waitForRos; rosparam set use_sim_time false
-  - rosbag:
-      layout: tiled
-      panes:
-        - waitForOffboard; ./record.sh
+        - ros2 run rmw_zenoh_cpp rmw_zenohd
   - hw_api:
       layout: tiled
       panes:
-        - waitForTime; roslaunch mrs_uav_dji_tello_api api.launch
+        - ros2 launch mrs_uav_dji_tello_api tellopy_wrapper.launch.py
+        - ros2 launch mrs_uav_dji_tello_api hw_api.launch.py
+  - core:
+      layout: tiled
+      panes:
+        - ros2 launch mrs_uav_core core.launch.py
+          platform_config:=$PLATFORM_CONFIG
+          world_config:=./config/world_config.yaml
+          custom_config:=./config/custom_config.yaml
+          network_config:=./config/network_config.yaml
   - status:
       layout: tiled
       panes:
-        - waitForHw; roslaunch mrs_uav_status status.launch
-  - control:
-      layout: tiled
-      panes:
-        - waitForHw; roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_dji_tello_api`/config/mrs_uav_system/tello.yaml custom_config:=./config/custom_config.yaml world_config:=./config/world.yaml network_config:=./config/network_config.yaml
+        - ros2 run mrs_uav_status status.sh
   - takeoff:
       layout: even-vertical
       panes:
-        - 'history -s rosservice call /uav1/hw_api/arming 1'
-        - 'history -s rosservice call /uav1/tellopy_wrapper/zero'
-        - 'history -s rosservice call /uav1/uav_manager/midair_activation'
+        - 'history -s ros2 service call /uav1/hw_api/arming std_srvs/srv/SetBool "{data: 1}"'
+        - 'history -s ros2 service call /uav1/tellopy_wrapper/zero std_srvs/srv/Trigger "{}"'
+        - 'history -s ros2 service call /uav1/uav_manager/midair_activation std_srvs/srv/Trigger "{}"'
   - throw_and_go:
       layout: even-vertical
       panes:
-        - 'history -s rosservice call /uav1/tellopy_wrapper/throw'
-        - 'history -s rosservice call /uav1/tellopy_wrapper/zero'
-        - 'history -s rosservice call /uav1/uav_manager/midair_activation'
-  - land:
-      layout: tiled
-      panes:
-        - 'history -s rosservice call /uav1/hw_api/arming 0'
-  - goto:
-      layout: tiled
-      panes:
-        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_relative \"goal: \[0.0, -0.5, 0.0, 0.0\]\"'
-        - 'history -s rosservice call /$UAV_NAME/control_manager/goto_relative \"goal: \[0.0, 0.5, 0.0, 0.0\]\"'
+        - "history -s ros2 service call /uav1/tellopy_wrapper/throw std_srvs/srv/Trigger '{}'"
+        - 'history -s ros2 service call /uav1/tellopy_wrapper/zero std_srvs/srv/Trigger "{}"'
+        - 'history -s ros2 service call /uav1/uav_manager/midair_activation std_srvs/srv/Trigger "{}"'
   - rviz:
       layout: tiled
       panes:
-        - waitForControl; rosrun rviz rviz -d ./rviz.rviz
-        - waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
-        - waitForControl; waitForControl; roslaunch mrs_rviz_plugins rviz_interface.launch
-  - layout:
-      layout: tiled
-      panes:
-        - waitForControl; sleep 3; ~/.i3/layout_manager.sh ./layout.json
+        - ros2 run rviz2 rviz2 -d ./rviz.rviz
+  # - layout:
+  #     layout: tiled
+  #     panes:
+  #       - waitForCore; ~/.i3/layout_manager.sh ./layout.json

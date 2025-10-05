@@ -15,6 +15,9 @@ if(${USE_ROS_TIMER})
 endif()
 
 set(DEPENDENCIES
+  ament_cmake
+  ament_cmake_python
+  rclpy
   rclcpp
   rclcpp_components
   geometry_msgs
@@ -87,6 +90,13 @@ install(
   DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
+
+install(
+  FILES ${PROJECT_NAME}/tellopy_wrapper.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+ament_python_install_package(${PROJECT_NAME})
 
 # install(
 #   DIRECTORY tmux
