@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 3.5)
 project(mrs_uav_dji_tello_api)
 
-set(CATKIN_DEPENDENCIES
-  cmake_modules
+# 1 == use rclcpp::Timer implementation
+# 0 == use MRS's thread timer implementation
+set(USE_ROS_TIMER 0)
+
+# set the correct standards
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(${USE_ROS_TIMER})
+  MESSAGE(WARNING "[mrs_uav_managers]: Compiling with ROS Timers. This can cause high CPU load in runtime.")
+endif()
+
+set(DEPENDENCIES
+  rclcpp
+  rclcpp_components
   geometry_msgs
   mavros_msgs
   mrs_lib
@@ -10,78 +24,88 @@ set(CATKIN_DEPENDENCIES
   mrs_uav_hw_api
   nav_msgs
   pluginlib
-  roscpp
-  rospy
   sensor_msgs
   std_msgs
+  backward_ros
   )
 
-find_package(catkin REQUIRED COMPONENTS
-  ${CATKIN_DEPENDENCIES}
-  )
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+foreach(DEP IN LISTS DEPENDENCIES)
+  find_package(${DEP} REQUIRED)
+endforeach()
 
 set(LIBRARIES
-  MrsUavHwDjiTelloApi
-  )
-
-catkin_package(
-  CATKIN_DEPENDS ${CATKIN_DEPENDENCIES}
-  LIBRARIES ${LIBRARIES}
+  MrsUavHwDjiTelloApi_Api
   )
 
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
+  ${mrs_lib_INCLUDE_DIRS}
+  ${mrs_uav_hw_api_INCLUDE_DIRS}
   )
 
 # Plugin
 
-add_library(MrsUavHwDjiTelloApi
+add_library(MrsUavHwDjiTelloApi_Api SHARED
   src/api.cpp
   )
 
-add_dependencies(MrsUavHwDjiTelloApi
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
+ament_target_dependencies(MrsUavHwDjiTelloApi_Api
+  ${DEPENDENCIES}
+)
 
-target_link_libraries(MrsUavHwDjiTelloApi
-  ${catkin_LIBRARIES}
-  ${Eigen_LIBRARIES}
-  )
+target_compile_definitions(MrsUavHwDjiTelloApi_Api PRIVATE USE_ROS_TIMER=${USE_ROS_TIMER})
 
+## --------------------------------------------------------------
+## |                       Export plugins                       |
+## --------------------------------------------------------------
+
+# <package of the base class>, <relative path to the xml>
+pluginlib_export_plugin_description_file(mrs_uav_hw_api plugins.xml)
 
 ## --------------------------------------------------------------
 ## |                           Install                          |
 ## --------------------------------------------------------------
 
-install(TARGETS ${LIBRARIES}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-  )
+ament_export_libraries(
+  ${LIBRARIES}
+)
 
-install(DIRECTORY launch config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  )
+install(
+  TARGETS ${LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
-install(DIRECTORY scripts/
-  USE_SOURCE_PERMISSIONS
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
-install(DIRECTORY scripts
-  USE_SOURCE_PERMISSIONS
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  )
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
+)
 
-install(DIRECTORY tmux/
-  USE_SOURCE_PERMISSIONS
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/tmux
-  )
+# install(
+#   DIRECTORY tmux
+#   USE_SOURCE_PERMISSIONS
+#   DESTINATION share/${PROJECT_NAME}
+# )
 
-install(FILES plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  )
+# install(
+#   DIRECTORY scripts
+#   USE_SOURCE_PERMISSIONS
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
+ament_export_targets(
+  export_${PROJECT_NAME} HAS_LIBRARY_TARGET
+)
+
+ament_export_dependencies(
+  ${DEPENDENCIES}
+)
+
+ament_package()
