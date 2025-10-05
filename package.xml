@@ -34,7 +34,7 @@
   <depend>std_msgs</depend>
   <depend>eigen</depend>
   <depend>python3-av</depend>
-  <depend>tf-transformations</depend>
+  <depend>tf_transformations</depend>
 
   <depend>backward_ros</depend>
 
