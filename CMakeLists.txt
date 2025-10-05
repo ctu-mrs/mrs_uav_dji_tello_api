@@ -98,17 +98,11 @@ install(
 
 ament_python_install_package(${PROJECT_NAME})
 
-# install(
-#   DIRECTORY tmux
-#   USE_SOURCE_PERMISSIONS
-#   DESTINATION share/${PROJECT_NAME}
-# )
-
-# install(
-#   DIRECTORY scripts
-#   USE_SOURCE_PERMISSIONS
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(
+  DIRECTORY tmux
+  USE_SOURCE_PERMISSIONS
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_export_targets(
   export_${PROJECT_NAME} HAS_LIBRARY_TARGET
