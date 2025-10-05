@@ -43,9 +43,13 @@ windows:
   - takeoff:
       layout: even-vertical
       panes:
-        - 'history -s ./arming.sh'
+        - 'history -s ./takeoff.sh'
         - "history -s ros2 service call /uav1/tellopy_wrapper/zero std_srvs/srv/Trigger '{}'"
         - "history -s ros2 service call /uav1/uav_manager/midair_activation std_srvs/srv/Trigger '{}'"
+  - land:
+      layout: even-vertical
+      panes:
+        - "history -s ./land.sh"
   - throw_and_go:
       layout: even-vertical
       panes:
