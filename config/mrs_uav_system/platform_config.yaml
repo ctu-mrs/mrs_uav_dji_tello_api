@@ -55,8 +55,8 @@ mrs_uav_managers:
     slow:
 
       horizontal:
-        speed: 0.5
-        acceleration: 0.5
+        speed: 0.3
+        acceleration: 0.3
         jerk: 20.0
         snap: 20.0
 

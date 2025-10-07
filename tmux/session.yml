@@ -35,7 +35,7 @@ windows:
   - flame:
       layout: tiled
       panes:
-        - ros2 launch flame_ros flame_ros_sim.launch.py cam_type:=tellopy_wrapper/rgb
+        - ros2 launch flame_ros flame_ros.launch.py camera_topic:=tellopy_wrapper/rgb custom_config:=./config/flame.yaml
   - static_tf:
       layout: tiled
       panes:
