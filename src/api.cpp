@@ -67,8 +67,8 @@ public:
 
   // | -------------------- service callbacks ------------------- |
 
-  std::tuple<bool, std::string> callbackArming(const bool &request);
-  std::tuple<bool, std::string> callbackOffboard(void);
+  mrs_lib::Task<std::tuple<bool, std::string>> callbackArming(const bool &request);
+  mrs_lib::Task<std::tuple<bool, std::string>> callbackOffboard(void);
 
 private:
   bool is_initialized_ = false;
@@ -140,7 +140,7 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
   common_handlers_ = common_handlers;
 
   cbkgrp_subs_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-  cbkgrp_sc_   = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+  cbkgrp_sc_   = node_->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 
   pos_ << 0, 0, 0;
   last_update_ = rclcpp::Time(0, 0, clock_->get_clock_type());
@@ -382,7 +382,7 @@ void Api::callbackTrackerCmd(const mrs_msgs::msg::TrackerCommand::ConstSharedPtr
 
 /* callbackArming() //{ */
 
-std::tuple<bool, std::string> Api::callbackArming([[maybe_unused]] const bool &request) {
+mrs_lib::Task<std::tuple<bool, std::string>> Api::callbackArming([[maybe_unused]] const bool &request) {
 
   std::stringstream ss;
 
@@ -396,7 +396,7 @@ std::tuple<bool, std::string> Api::callbackArming([[maybe_unused]] const bool &r
 
   RCLCPP_INFO(node_->get_logger(), "calling for %s", request ? "arming" : "disarming");
 
-  auto response = sch_arm_.callSync(srv_out);
+  auto response = co_await sch_arm_.callAwaitable(srv_out);
 
   if (response) {
 
@@ -414,14 +414,14 @@ std::tuple<bool, std::string> Api::callbackArming([[maybe_unused]] const bool &r
     RCLCPP_ERROR_STREAM_THROTTLE(node_->get_logger(), *clock_, 1000, "" << ss.str());
   }
 
-  return {response.value()->success, ss.str()};
+  co_return {response.value()->success, ss.str()};
 }
 
 //}
 
 /* callbackOffboard() //{ */
 
-std::tuple<bool, std::string> Api::callbackOffboard(void) {
+mrs_lib::Task<std::tuple<bool, std::string>> Api::callbackOffboard(void) {
 
   std::stringstream ss;
 
@@ -430,14 +430,14 @@ std::tuple<bool, std::string> Api::callbackOffboard(void) {
     offboard_ = false;
     ss << "not armed";
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *clock_, 1000, "%s", ss.str().c_str());
-    return {false, ss.str()};
+    co_return {false, ss.str()};
 
   } else {
 
     offboard_ = true;
     ss << "success";
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *clock_, 1000, "%s", ss.str().c_str());
-    return {true, ss.str()};
+    co_return {true, ss.str()};
   }
 }
 
