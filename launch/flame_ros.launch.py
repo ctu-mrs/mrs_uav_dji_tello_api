@@ -77,7 +77,7 @@ def generate_launch_description():
         name='flame_container',
         namespace=uav_name,
         package='rclcpp_components',
-        executable='component_container_mt',
+        executable='component_container_events_cbg',
         output="screen",
         #prefix='xterm -e gdb -ex run --args',
         # prefix='gdb -ex run --args',
