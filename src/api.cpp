@@ -121,6 +121,8 @@ private:
 
   geometry_msgs::msg::TwistStamped twist_;
   std::mutex                       mutex_twist_;
+
+  mrs_msgs::msg::HwApiCapabilities _capabilities_;
 };
 
 //}
@@ -143,6 +145,34 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   pos_ << 0, 0, 0;
   last_update_ = rclcpp::Time(0, 0, clock_->get_clock_type());
+
+  // | ---------------------- capabilities ---------------------- |
+
+  // what is requested and implemented
+  _capabilities_          = common_handlers_->requested_capabilities;
+  _capabilities_.api_name = "TelloApi";
+
+  _capabilities_.accepts_actuator_cmd              = false;
+  _capabilities_.accepts_control_group_cmd         = false;
+  _capabilities_.accepts_attitude_rate_cmd         = false;
+  _capabilities_.accepts_attitude_cmd              = false;
+  _capabilities_.accepts_acceleration_hdg_rate_cmd = false;
+  _capabilities_.accepts_acceleration_hdg_cmd      = false;
+  _capabilities_.accepts_velocity_hdg_cmd          = false;
+  _capabilities_.accepts_position_cmd              = false;
+
+  _capabilities_.produces_gnss                 = false;
+  _capabilities_.produces_gnss_status          = false;
+  _capabilities_.produces_rtk                  = false;
+  _capabilities_.produces_ground_truth         = false;
+  _capabilities_.produces_altitude             = false;
+  _capabilities_.produces_magnetometer_heading = false;
+  _capabilities_.produces_magnetic_field       = false;
+  _capabilities_.produces_rc_channels          = false;
+  _capabilities_.produces_rc_rssi              = false;
+  _capabilities_.produces_position             = false;
+  _capabilities_.produces_velocity             = false;
+  _capabilities_.produces_angular_velocity     = false;
 
   // | ----------------------- subscribers ---------------------- |
 
@@ -210,20 +240,9 @@ mrs_msgs::msg::HwApiStatus Api::getStatus() {
 
 mrs_msgs::msg::HwApiCapabilities Api::getCapabilities() {
 
-  mrs_msgs::msg::HwApiCapabilities capabilities;
+  _capabilities_.stamp = node_->now();
 
-  capabilities.api_name = "TelloApi";
-  capabilities.stamp    = node_->now();
-
-  capabilities.accepts_velocity_hdg_rate_cmd = true;
-
-  capabilities.produces_odometry        = true;
-  capabilities.produces_battery_state   = true;
-  capabilities.produces_orientation     = true;
-  capabilities.produces_distance_sensor = true;
-  capabilities.produces_imu             = true;
-
-  return capabilities;
+  return _capabilities_;
 }
 
 //}
@@ -495,7 +514,9 @@ void Api::callbackHeight(const std_msgs::msg::Float64::ConstSharedPtr msg) {
   range_out.max_range = 10.0;
   range_out.range     = msg->data;
 
-  common_handlers_->publishers.publishDistanceSensor(range_out);
+  if (_capabilities_.produces_distance_sensor) {
+    common_handlers_->publishers.publishDistanceSensor(range_out);
+  }
 }
 
 //}
@@ -557,7 +578,9 @@ void Api::callbackImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg) {
 
   RCLCPP_INFO_ONCE(node_->get_logger(), "getting imu");
 
-  common_handlers_->publishers.publishIMU(*msg);
+  if (_capabilities_.produces_imu) {
+    common_handlers_->publishers.publishIMU(*msg);
+  }
 }
 
 //}
@@ -572,7 +595,9 @@ void Api::callbackBattery(const sensor_msgs::msg::BatteryState::ConstSharedPtr m
 
   RCLCPP_INFO_ONCE(node_->get_logger(), "getting battery");
 
-  common_handlers_->publishers.publishBatteryState(*msg);
+  if (_capabilities_.produces_battery_state) {
+    common_handlers_->publishers.publishBatteryState(*msg);
+  }
 }
 
 //}
@@ -606,7 +631,9 @@ void Api::publishOdom(void) {
   odom.twist.twist.angular.y = 0;
   odom.twist.twist.angular.z = 0;
 
-  common_handlers_->publishers.publishOdometry(odom);
+  if (_capabilities_.produces_odometry) {
+    common_handlers_->publishers.publishOdometry(odom);
+  }
 
   // | ----------------- publish the orientation ---------------- |
 
@@ -615,7 +642,9 @@ void Api::publishOdom(void) {
   quat.header     = pose.header;
   quat.quaternion = pose.pose.orientation;
 
-  common_handlers_->publishers.publishOrientation(quat);
+  if (_capabilities_.produces_orientation) {
+    common_handlers_->publishers.publishOrientation(quat);
+  }
 
   // | ---------------- publish angular velocity ---------------- |
 
