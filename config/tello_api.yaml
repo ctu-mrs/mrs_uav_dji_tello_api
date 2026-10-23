@@ -1,1 +1,3 @@
-hw_interface_plugin: "mrs_uav_dji_tello_api::Api"
+mrs_uav_hw_api:
+
+  hw_interface_plugin: "mrs_uav_dji_tello_api::Api"
