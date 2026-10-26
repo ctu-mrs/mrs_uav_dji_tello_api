@@ -191,11 +191,17 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   sh_twist_ = mrs_lib::SubscriberHandler<geometry_msgs::msg::TwistStamped>(shopts, "~/twist_in", &Api::callbackTwist, this);
 
-  sh_battery_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::BatteryState>(shopts, "~/battery_in", &Api::callbackBattery, this);
+  if (_capabilities_.produces_battery_state) {
+    sh_battery_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::BatteryState>(shopts, "~/battery_in", &Api::callbackBattery, this);
+  }
 
-  sh_imu_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>(shopts, "~/imu_in", &Api::callbackImu, this);
+  if (_capabilities_.produces_imu) {
+    sh_imu_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>(shopts, "~/imu_in", &Api::callbackImu, this);
+  }
 
-  sh_height_ = mrs_lib::SubscriberHandler<std_msgs::msg::Float64>(shopts, "~/height_in", &Api::callbackHeight, this);
+  if (_capabilities_.produces_distance_sensor) {
+    sh_height_ = mrs_lib::SubscriberHandler<std_msgs::msg::Float64>(shopts, "~/height_in", &Api::callbackHeight, this);
+  }
 
   // | --------------------- service clients -------------------- |
 
@@ -204,7 +210,9 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   // | ----------------------- publishers ----------------------- |
 
-  ph_cmd_ = mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgRateCmd>(node_, "~/cmd_out");
+  if (_capabilities_.accepts_velocity_hdg_rate_cmd) {
+    ph_cmd_ = mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgRateCmd>(node_, "~/cmd_out");
+  }
 
   // | ----------------------- finish init ---------------------- |
 
@@ -515,9 +523,7 @@ void Api::callbackHeight(const std_msgs::msg::Float64::ConstSharedPtr msg) {
   range_out.max_range = 10.0;
   range_out.range     = msg->data;
 
-  if (_capabilities_.produces_distance_sensor) {
-    common_handlers_->publishers.publishDistanceSensor(range_out);
-  }
+  common_handlers_->publishers.publishDistanceSensor(range_out);
 }
 
 //}
@@ -579,9 +585,7 @@ void Api::callbackImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg) {
 
   RCLCPP_INFO_ONCE(node_->get_logger(), "getting imu");
 
-  if (_capabilities_.produces_imu) {
-    common_handlers_->publishers.publishIMU(*msg);
-  }
+  common_handlers_->publishers.publishIMU(*msg);
 }
 
 //}
@@ -596,9 +600,7 @@ void Api::callbackBattery(const sensor_msgs::msg::BatteryState::ConstSharedPtr m
 
   RCLCPP_INFO_ONCE(node_->get_logger(), "getting battery");
 
-  if (_capabilities_.produces_battery_state) {
-    common_handlers_->publishers.publishBatteryState(*msg);
-  }
+  common_handlers_->publishers.publishBatteryState(*msg);
 }
 
 //}
