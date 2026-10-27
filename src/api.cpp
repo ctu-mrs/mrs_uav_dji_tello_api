@@ -4,7 +4,6 @@
 
 #include <mrs_uav_hw_api/api.h>
 
-#include <mrs_lib/param_loader.h>
 #include <mrs_lib/attitude_converter.h>
 #include <mrs_lib/mutex.h>
 #include <mrs_lib/publisher_handler.h>
@@ -122,6 +121,8 @@ private:
 
   geometry_msgs::msg::TwistStamped twist_;
   std::mutex                       mutex_twist_;
+
+  mrs_msgs::msg::HwApiCapabilities _capabilities_;
 };
 
 //}
@@ -145,31 +146,34 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
   pos_ << 0, 0, 0;
   last_update_ = rclcpp::Time(0, 0, clock_->get_clock_type());
 
-  // | ------------------- loading parameters ------------------- |
+  // | ---------------------- capabilities ---------------------- |
 
-  mrs_lib::ParamLoader local_param_loader(node_, "TelloApi");
+  // what is requested and implemented
+  _capabilities_          = common_handlers_->requested_capabilities;
+  _capabilities_.api_name = "TelloApi";
 
-  std::string custom_config_path;
+  _capabilities_.accepts_actuator_cmd              = false;
+  _capabilities_.accepts_control_group_cmd         = false;
+  _capabilities_.accepts_attitude_rate_cmd         = false;
+  _capabilities_.accepts_attitude_cmd              = false;
+  _capabilities_.accepts_acceleration_hdg_rate_cmd = false;
+  _capabilities_.accepts_acceleration_hdg_cmd      = false;
+  _capabilities_.accepts_velocity_hdg_cmd          = false;
+  _capabilities_.accepts_position_cmd              = false;
+  _capabilities_.accepts_feedforward               = false;
 
-  common_handlers_->main_param_loader->loadParam("custom_config", custom_config_path);
-
-  if (custom_config_path != "") {
-    local_param_loader.addYamlFile(custom_config_path);
-  }
-
-  std::vector<std::string> config_files;
-  common_handlers_->main_param_loader->loadParamReusable("configs", config_files);
-
-  if (!common_handlers_->main_param_loader->loadedSuccessfully()) {
-    RCLCPP_ERROR(node_->get_logger(), "Could not load all parameters!");
-    rclcpp::shutdown();
-    exit(1);
-  }
-
-  for (auto config_file : config_files) {
-    RCLCPP_INFO(node_->get_logger(), "loading config file '%s'", config_file.c_str());
-    local_param_loader.addYamlFile(config_file);
-  }
+  _capabilities_.produces_gnss                 = false;
+  _capabilities_.produces_gnss_status          = false;
+  _capabilities_.produces_rtk                  = false;
+  _capabilities_.produces_ground_truth         = false;
+  _capabilities_.produces_altitude             = false;
+  _capabilities_.produces_magnetometer_heading = false;
+  _capabilities_.produces_magnetic_field       = false;
+  _capabilities_.produces_rc_channels          = false;
+  _capabilities_.produces_rc_rssi              = false;
+  _capabilities_.produces_position             = false;
+  _capabilities_.produces_velocity             = false;
+  _capabilities_.produces_angular_velocity     = false;
 
   // | ----------------------- subscribers ---------------------- |
 
@@ -187,11 +191,17 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   sh_twist_ = mrs_lib::SubscriberHandler<geometry_msgs::msg::TwistStamped>(shopts, "~/twist_in", &Api::callbackTwist, this);
 
-  sh_battery_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::BatteryState>(shopts, "~/battery_in", &Api::callbackBattery, this);
+  if (_capabilities_.produces_battery_state) {
+    sh_battery_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::BatteryState>(shopts, "~/battery_in", &Api::callbackBattery, this);
+  }
 
-  sh_imu_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>(shopts, "~/imu_in", &Api::callbackImu, this);
+  if (_capabilities_.produces_imu) {
+    sh_imu_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>(shopts, "~/imu_in", &Api::callbackImu, this);
+  }
 
-  sh_height_ = mrs_lib::SubscriberHandler<std_msgs::msg::Float64>(shopts, "~/height_in", &Api::callbackHeight, this);
+  if (_capabilities_.produces_distance_sensor) {
+    sh_height_ = mrs_lib::SubscriberHandler<std_msgs::msg::Float64>(shopts, "~/height_in", &Api::callbackHeight, this);
+  }
 
   // | --------------------- service clients -------------------- |
 
@@ -200,7 +210,9 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   // | ----------------------- publishers ----------------------- |
 
-  ph_cmd_ = mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgRateCmd>(node_, "~/cmd_out");
+  if (_capabilities_.accepts_velocity_hdg_rate_cmd) {
+    ph_cmd_ = mrs_lib::PublisherHandler<mrs_msgs::msg::HwApiVelocityHdgRateCmd>(node_, "~/cmd_out");
+  }
 
   // | ----------------------- finish init ---------------------- |
 
@@ -237,20 +249,9 @@ mrs_msgs::msg::HwApiStatus Api::getStatus() {
 
 mrs_msgs::msg::HwApiCapabilities Api::getCapabilities() {
 
-  mrs_msgs::msg::HwApiCapabilities capabilities;
+  _capabilities_.stamp = node_->now();
 
-  capabilities.api_name = "TelloApi";
-  capabilities.stamp    = node_->now();
-
-  capabilities.accepts_velocity_hdg_rate_cmd = true;
-
-  capabilities.produces_odometry        = true;
-  capabilities.produces_battery_state   = true;
-  capabilities.produces_orientation     = true;
-  capabilities.produces_distance_sensor = true;
-  capabilities.produces_imu             = true;
-
-  return capabilities;
+  return _capabilities_;
 }
 
 //}
@@ -633,7 +634,9 @@ void Api::publishOdom(void) {
   odom.twist.twist.angular.y = 0;
   odom.twist.twist.angular.z = 0;
 
-  common_handlers_->publishers.publishOdometry(odom);
+  if (_capabilities_.produces_odometry) {
+    common_handlers_->publishers.publishOdometry(odom);
+  }
 
   // | ----------------- publish the orientation ---------------- |
 
@@ -642,7 +645,9 @@ void Api::publishOdom(void) {
   quat.header     = pose.header;
   quat.quaternion = pose.pose.orientation;
 
-  common_handlers_->publishers.publishOrientation(quat);
+  if (_capabilities_.produces_orientation) {
+    common_handlers_->publishers.publishOrientation(quat);
+  }
 
   // | ---------------- publish angular velocity ---------------- |
 

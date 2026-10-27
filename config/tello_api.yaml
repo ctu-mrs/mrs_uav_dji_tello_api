@@ -1,1 +1,34 @@
-hw_interface_plugin: "mrs_uav_dji_tello_api::Api"
+mrs_uav_hw_api:
+
+  hw_interface_plugin: "mrs_uav_dji_tello_api::Api"
+
+  inputs:
+    actuators:             false # not supported
+    control_group:         false # not supported
+    attitude_rate:         false # not supported
+    attitude:              false # not supported
+    acceleration_hdg_rate: false # not supported
+    acceleration_hdg:      false # not supported
+    velocity_hdg_rate:     true
+    velocity_hdg:          false # not supported
+    position:              false # not supported
+    feedforward:           false # not supported
+
+  outputs:
+    distance_sensor:      true
+    gnss:                 false # not supported
+    gnss_status:          false # not supported
+    rtk:                  false # not supported
+    ground_truth:         false # not supported
+    imu:                  true
+    altitude:             false # not supported
+    magnetometer_heading: false # not supported
+    magnetic_field:       false # not supported
+    rc_channels:          false # not supported
+    rc_rssi:              false # not supported
+    battery_state:        true
+    position:             false # not supported
+    orientation:          true
+    velocity:             false # not supported
+    angular_velocity:     false # not supported
+    odometry:             true
